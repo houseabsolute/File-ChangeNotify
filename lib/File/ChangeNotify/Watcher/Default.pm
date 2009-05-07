@@ -4,7 +4,10 @@ use strict;
 use warnings;
 
 use File::Find qw( finddepth );
-use Time::HiRes qw( stat sleep );
+use Time::HiRes qw( sleep );
+# Trying to import this just blows up on Win32, and checking
+# Time::HiRes::d_hires_stat() _also_ blows up on Win32.
+BEGIN { eval { Time::HiRes->import('stat') } }
 
 use Moose;
 use MooseX::SemiAffordanceAccessor;
