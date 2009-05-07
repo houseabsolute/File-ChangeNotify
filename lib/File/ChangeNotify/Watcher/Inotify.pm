@@ -3,7 +3,6 @@ package File::ChangeNotify::Watcher::Inotify;
 use strict;
 use warnings;
 
-use Cwd qw( abs_path );
 use File::Find qw( finddepth );
 use Linux::Inotify2;
 
@@ -30,6 +29,7 @@ has _mask =>
       lazy_build => 1,
     );
 
+sub sees_all_events { 1 }
 
 sub BUILD
 {
@@ -38,9 +38,9 @@ sub BUILD
     $self->_inotify()->blocking( $self->is_blocking() );
 
     # If this is done via a lazy_build then the call to
-    # ->_add_directory ends up causing endless recursion when it calls
-    # ->_inotify itself.
-    $self->_add_directory($_) for @{ $self->directories() };
+    # ->_watch_directory ends up causing endless recursion when it
+    # calls ->_inotify itself.
+    $self->_watch_directory($_) for @{ $self->directories() };
 
     return $self;
 }
@@ -82,17 +82,23 @@ sub _interesting_events
     {
         if ( $event->IN_CREATE() && $event->IN_ISDIR() )
         {
-            $self->_add_directory( $event->fullname() );
+            $self->_watch_directory( $event->fullname() );
             push @interesting, $event;
+            push @interesting, $self->_fake_events_for_new_dir( $event->fullname() );
         }
         elsif ( $event->IN_DELETE_SELF()
-                || $event->fullname() =~ /$regex/ )
+                # We just want to check the _file_ name
+                || $event->name() =~ /$regex/ )
         {
+            $self->_remove_directory( $event->fullname() )
+                if $event->IN_DELETE_SELF();
+
             push @interesting, $event;
         }
     }
 
-    return  map { $self->_convert_event($_) } @interesting;
+    return
+        map { $_->can('path') ? $_ : $self->_convert_event($_) } @interesting;
 }
 
 sub _build__mask
@@ -105,14 +111,18 @@ sub _build__mask
     return $mask;
 }
 
-sub _add_directory
+sub _watch_directory
 {
     my $self = shift;
     my $dir  = shift;
 
+    # A directory could be created & then deleted before we get a
+    # chance to act on it.
+    return unless -d $dir;
+
     finddepth
         ( { wanted      => sub { $self->_add_watch_if_dir($File::Find::name) },
-            follow_fast => $self->follow_symlinks() ? 1 : 0,
+            follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
             no_chdir    => 1
           },
           $dir
@@ -124,9 +134,39 @@ sub _add_watch_if_dir
     my $self = shift;
     my $path = shift;
 
+    return if -l $path && ! $self->follow_symlinks();
+
     return unless -d $path;
 
-    $self->_inotify()->watch( abs_path($path), $self->_mask() );
+    $self->_inotify()->watch( $path, $self->_mask() );
+}
+
+sub _fake_events_for_new_dir
+{
+    my $self = shift;
+    my $dir  = shift;
+
+    return unless -d $dir;
+
+    my @events;
+    finddepth
+        ( { wanted      => sub { my $path = $File::Find::name;
+
+                                 return if $path eq $dir;
+
+                                 push @events,
+                                     $self->event_class()->new
+                                         ( path       => $path,
+                                           event_type => 'create',
+                                         );
+                               },
+            follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
+            no_chdir    => 1
+          },
+          $dir
+        );
+
+    return @events;
 }
 
 sub _convert_event
@@ -135,7 +175,7 @@ sub _convert_event
     my $event = shift;
 
     return
-        File::ChangeNotify::Event->new
+        $self->event_class()->new
             ( path       => $event->fullname(),
               event_type =>
                   (   $event->IN_CREATE()

@@ -79,6 +79,24 @@ sub new_events
     return $self->_interesting_events();
 }
 
+sub _add_directory
+{
+    my $self = shift;
+    my $dir  = shift;
+
+    return if grep { $_ eq $dir } $self->directories();
+
+    push @{ $self->directories() }, $dir;
+}
+
+sub _remove_directory
+{
+    my $self = shift;
+    my $dir  = shift;
+
+    $self->directories( [ grep { $_ ne $dir } @{ $self->directories() } ] );
+}
+
 no Moose;
 no Moose::Util::TypeConstraints;
 no MooseX::Params::Validate;
