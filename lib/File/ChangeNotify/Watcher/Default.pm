@@ -20,12 +20,6 @@ has _map =>
       default => sub { {} },
     );
 
-has wait_interval =>
-    ( is      => 'ro',
-      isa     => 'Num',
-      default => 2,
-    );
-
 
 sub sees_all_events { 0 }
 
@@ -64,8 +58,8 @@ sub _entry_for_map
 
     unless ($is_dir)
     {
-        my $regex = $self->regex();
-        return unless ( File::Spec->splitpath($path) )[2] =~ /$regex/;
+        my $filter = $self->filter();
+        return unless ( File::Spec->splitpath($path) )[2] =~ /$filter/;
     }
 
     return { is_dir => $is_dir,
@@ -83,7 +77,7 @@ sub _mtime
     return $stat[9];
 }
 
-sub _wait_for_events
+sub wait_for_events
 {
     my $self = shift;
 
@@ -115,8 +109,8 @@ sub _interesting_events
             }
 
             push @interesting,
-                $self->event_class()->new( path       => $path,
-                                           event_type => 'delete',
+                $self->event_class()->new( path => $path,
+                                           type => 'delete',
                                          );
         }
         elsif (    ! $old_map->{$path}{is_dir}
@@ -125,8 +119,8 @@ sub _interesting_events
               )
         {
             push @interesting,
-                $self->event_class()->new( path       => $path,
-                                           event_type => 'modify',
+                $self->event_class()->new( path => $path,
+                                           type => 'modify',
                                          );
         }
     }
@@ -136,15 +130,15 @@ sub _interesting_events
         if ( -d $path )
         {
             push @interesting,
-                $self->event_class()->new( path       => $path,
-                                           event_type => 'create',
+                $self->event_class()->new( path => $path,
+                                           type => 'create',
                                          ),
         }
         else
         {
             push @interesting,
-                $self->event_class()->new( path       => $path,
-                                           event_type => 'create',
+                $self->event_class()->new( path => $path,
+                                           type => 'create',
                                          );
         }
     }
@@ -157,3 +151,33 @@ sub _interesting_events
 no Moose;
 
 __PACKAGE__->meta()->make_immutable();
+
+1;
+
+__END__
+
+=head1 NAME
+
+File::ChangeNotify::Watcher::Default - Fallback default watcher subclass
+
+=head1 DESCRIPTION
+
+This class implements watching by comparing two snapshopts of the
+filesystem tree. It if inefficient and dumb, and so it is the subclass
+of last resort.
+
+Its C<< $watcher->wait_for_events() >> method sleeps between
+comparisons of the filesystem snapshot it takes.
+
+=head1 AUTHOR
+
+Dave Rolsky, E<gt>autarch@urth.orgE<lt>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2009 Dave Rolsky, All Rights Reserved.
+
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

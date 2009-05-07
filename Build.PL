@@ -23,11 +23,6 @@ my $builder =
                               'File::Temp' => '0',
                               'Test::More' => '0',
                             },
-          auto_features  =>
-              { 'inotify' => { description => 'Inotify-based watcher',
-                               requires    => { 'Linux::Inotify2' => '0' },
-                             },
-              },
           create_readme => 1,
           sign          => 1,
         );

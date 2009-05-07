@@ -68,23 +68,49 @@ __END__
 
 =head1 NAME
 
-File::ChangeNotify - The fantastic new File::ChangeNotify!
+File::ChangeNotify - Watch for changes to files, cross-platform style
 
 =head1 SYNOPSIS
 
-XXX - change this!
-
     use File::ChangeNotify;
 
-    my $foo = File::ChangeNotify->new();
+    my $watcher =
+        File::ChangeNotify->instantiate_watcher
+            ( directories => [ '/my/path', '/my/other' ],
+              regex       => qr/\.(?:pm|conf|yml)$/,
+            );
 
-    ...
+    if ( my @events = $watcher->new_events() ) { ... }
+
+    $watcher->watch($handler);
 
 =head1 DESCRIPTION
 
+This module provides an API for creating a
+L<File::ChangeNotify::Watcher> subclass that will work on your
+platform.
+
+Most of the documentation for this distro is in
+L<File::ChangeNotify::Watcher>.
+
 =head1 METHODS
 
-This class provides the following methods
+This class provides the following methods:
+
+=head2 File::ChangeNotify->instantiate_watcher(...)
+
+This method looks at each available subclass of
+L<File::ChangeNotify::Watcher> and instantiates the first one it can
+load, using the arguments you provided.
+
+It always tries to use the L<File::ChangeNotify::Watcher::Default>
+class last, on the assumption that any other class that is available
+is a better option.
+
+=head2 File::ChangeNotify->usable_classes()
+
+Returns a list of all the loadable L<File::ChangeNotify::Watcher>
+subclasses.
 
 =head1 AUTHOR
 
@@ -92,10 +118,10 @@ Dave Rolsky, E<gt>autarch@urth.orgE<lt>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-file-changenotify@rt.cpan.org>,
-or through the web interface at L<http://rt.cpan.org>.  I will be
-notified, and then you'll automatically be notified of progress on
-your bug as I make changes.
+Please report any bugs or feature requests to
+C<bug-file-changenotify@rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
 
 =head1 COPYRIGHT & LICENSE
 

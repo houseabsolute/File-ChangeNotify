@@ -38,11 +38,7 @@ sub _blocking
 {
     my $watcher = shift;
 
-    my $receiver = ReceiveEvents->new();
-
-    $watcher->watch($receiver);
-
-    return $receiver->events();
+    return $watcher->wait_for_events();
 }
 
 sub _nonblocking
@@ -56,7 +52,7 @@ sub _shared_tests
 {
     _basic_tests(@_);
     _multi_event_tests(@_);
-    _regex_tests(@_);
+    _filter_tests(@_);
     _dir_add_remove_tests(@_);
 }
 
@@ -169,7 +165,7 @@ sub _multi_event_tests
     }
 }
 
-sub _regex_tests
+sub _filter_tests
 {
     my $class      = shift;
     my $events_sub = shift;
@@ -178,7 +174,7 @@ sub _regex_tests
 
     my $watcher = $class->new( directories     => $dir,
                                follow_symlinks => 0,
-                               regex           => qr/^foo/,
+                               filter          => qr/^foo/,
                                sleep_interval  => 0,
                              );
 
@@ -197,7 +193,7 @@ sub _regex_tests
               type => 'create',
             },
           ],
-          'file not matching regex is ignored but foo.txt is noted',
+          'file not matching filter is ignored but foo.txt is noted',
         );
 }
 
@@ -341,7 +337,7 @@ sub _is_events
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    is_deeply( [ map { { path => $_->path(), type => $_->event_type() } } @{ $got } ],
+    is_deeply( [ map { { path => $_->path(), type => $_->type() } } @{ $got } ],
                $expected,
                "$desc $_DESC"
              );
@@ -380,19 +376,5 @@ sub delete_file
     unlink $path
         or die "Cannot unlink $path: $!";
 }
-
-package
-    ReceiveEvents;
-
-sub new { bless [] }
-
-sub handle_events
-{
-    my $self = shift;
-
-    push @{ $self }, @_;
-}
-
-sub events { @{ $_[0] } }
 
 1;

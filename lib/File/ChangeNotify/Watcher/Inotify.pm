@@ -45,7 +45,7 @@ sub BUILD
     return $self;
 }
 
-sub _wait_for_events
+sub wait_for_events
 {
     my $self = shift;
 
@@ -71,7 +71,7 @@ sub _interesting_events
 {
     my $self = shift;
 
-    my $regex = $self->regex();
+    my $filter = $self->filter();
 
     my @interesting;
 
@@ -88,7 +88,7 @@ sub _interesting_events
         }
         elsif ( $event->IN_DELETE_SELF()
                 # We just want to check the _file_ name
-                || $event->name() =~ /$regex/ )
+                || $event->name() =~ /$filter/ )
         {
             $self->_remove_directory( $event->fullname() )
                 if $event->IN_DELETE_SELF();
@@ -156,8 +156,8 @@ sub _fake_events_for_new_dir
 
                                  push @events,
                                      $self->event_class()->new
-                                         ( path       => $path,
-                                           event_type => 'create',
+                                         ( path => $path,
+                                           type => 'create',
                                          );
                                },
             follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
@@ -176,8 +176,8 @@ sub _convert_event
 
     return
         $self->event_class()->new
-            ( path       => $event->fullname(),
-              event_type =>
+            ( path => $event->fullname(),
+              type =>
                   (   $event->IN_CREATE()
                     ? 'create'
                     : $event->IN_MODIFY()
@@ -199,38 +199,15 @@ __END__
 
 =head1 NAME
 
-File::ChangeNotify::Watcher - Watch for changed application files
-
-=head1 SYNOPSIS
-
-    my $watcher = File::ChangeNotify::Watcher->new(
-        directory => '/path/to/MyApp',
-        regex     => '\.yml$|\.yaml$|\.conf|\.pm$',
-        interval  => 3,
-    );
-
-    while (1) {
-        my @changed_files = $watcher->watch();
-    }
+File::ChangeNotify::Watcher::Inotify - Inotify-based watcher subclass
 
 =head1 DESCRIPTION
 
-This class monitors a directory of files for changes made to any file
-matching a regular expression. It correctly handles new files added to the
-application as well as files that are deleted.
+This class implements watching by using the L<Linux::Inotify2>
+module. This only works on Linux 2.6.13 or newer.
 
-=head1 METHODS
-
-=head2 new ( directory => $path [, regex => $regex, delay => $delay ] )
-
-Creates a new Watcher object.
-
-=head2 find_changed_files
-
-Returns a list of files that have been added, deleted, or changed
-since the last time watch was called. Each element returned is a hash
-reference with two keys. The C<file> key contains the filename, and
-the C<status> key contains one of "modified", "added", or "deleted".
+This watcher is much more efficient and accurate than the
+C<File::ChangeNotify::Watcher::Default> class.
 
 =head1 AUTHOR
 
