@@ -3,7 +3,7 @@ package File::ChangeNotify;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Carp qw( confess );
 use Class::MOP;
@@ -15,7 +15,7 @@ sub instantiate_watcher
 
     for my $class ( $class->_all_classes() )
     {
-        if ( Class::MOP::load_class($class) )
+        if ( _try_load($class) )
         {
             return $class->new(@_);
         }
