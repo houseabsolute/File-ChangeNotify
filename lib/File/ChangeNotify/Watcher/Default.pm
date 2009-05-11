@@ -86,7 +86,7 @@ sub wait_for_events
         my @events = $self->_interesting_events();
         return @events if @events;
 
-        sleep $self->wait_interval();
+        sleep $self->sleep_interval();
     }
 }
 
