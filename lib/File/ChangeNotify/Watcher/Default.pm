@@ -38,7 +38,8 @@ sub _build_map
 
     finddepth
         ( { wanted      => sub { my $path = $File::Find::name;
-                                 $map{$path} = $self->_entry_for_map($path);
+                                 my $entry = $self->_entry_for_map($path) or return;
+                                 $map{$path} = $entry;
                                },
             follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
             no_chdir    => 1
@@ -55,6 +56,8 @@ sub _entry_for_map
     my $path = shift;
 
     my $is_dir = -d $path ? 1 : 0;
+
+    return if -l $path && ! $is_dir;
 
     unless ($is_dir)
     {
