@@ -1,3 +1,16 @@
+0.02   2009-05-10
+
+- Not having Linux::Inotify2 caused attempting to make a watcher blow
+  up, when it should just use the Default watcher. Reported by Florian
+  Ragwitz.
+
+- Fixes a a bug in the Default watcher that causes it die
+  when trying to sleep in the wait_for_events method.
+
+- Fixed warnings from the Default watcher in the face of symlinks that
+  point to nonexistent files.
+
+
 0.01   2009-05-07
 
 - First version, released on an unsuspecting world.
