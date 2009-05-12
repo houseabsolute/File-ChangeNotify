@@ -1,3 +1,9 @@
+0.03   2009-05-11
+
+- Removed the default value for directories in the Watcher class,
+  because setting this value is really an app-specific task.
+
+
 0.02   2009-05-10
 
 - Not having Linux::Inotify2 caused attempting to make a watcher blow
