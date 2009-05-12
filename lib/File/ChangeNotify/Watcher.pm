@@ -7,9 +7,7 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Params::Validate qw( pos_validated_list );
 
-use Cwd qw( abs_path );
 use File::Spec;
-use FindBin;
 
 has filter =>
     ( is      => 'ro',
@@ -34,7 +32,7 @@ coerce $array_of_dirs
 has directories =>
     ( is      => 'ro',
       isa     => $array_of_dirs,
-      default => sub { [ abs_path( File::Spec->catdir( $FindBin::Bin, '..' ) ) ] },
+      required => 1,
       coerce  => 1,
     );
 
