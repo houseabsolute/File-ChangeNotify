@@ -86,13 +86,13 @@ sub _interesting_events
             push @interesting, $event;
             push @interesting, $self->_fake_events_for_new_dir( $event->fullname() );
         }
-        elsif ( $event->IN_DELETE_SELF()
-                # We just want to check the _file_ name
-                || $event->name() =~ /$filter/ )
+        elsif ( $event->IN_DELETE_SELF() )
         {
             $self->_remove_directory( $event->fullname() )
-                if $event->IN_DELETE_SELF();
-
+        }
+        # We just want to check the _file_ name
+        elsif( $event->name() =~ /$filter/ )
+        {
             push @interesting, $event;
         }
     }

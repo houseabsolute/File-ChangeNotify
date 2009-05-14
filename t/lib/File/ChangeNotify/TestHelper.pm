@@ -19,7 +19,7 @@ sub run_tests
 {
     my @classes = File::ChangeNotify->usable_classes();
 
-    plan tests => 27 * @classes;
+    plan tests => 31 * @classes;
 
     for my $class (@classes)
     {
@@ -213,7 +213,7 @@ sub _dir_add_remove_tests
     my $subdir2 = "$dir/subdir2";
 
     mkpath( $subdir1, 0, 0755 );
-    rmtree( $subdir1 );
+    rmtree($subdir1);
 
     mkpath( $subdir2, 0, 0755 );
 
@@ -256,6 +256,22 @@ sub _dir_add_remove_tests
               "created/delete $subdir1 and created one file ($path) in a new subdir ($subdir2)",
             );
     }
+
+    rmtree($subdir2);
+
+    _check_events
+        ( 2,
+          # The Default & Inotify watchers have different orders for these events
+          [ sort { $a->path() cmp $b->path() } $events_sub->($watcher) ],
+          [ { path => $subdir2,
+              type => 'delete',
+            },
+            { path => $path,
+              type => 'delete',
+            },
+          ],
+          "deleted $subdir2",
+        );
 }
 
 sub _symlink_tests
