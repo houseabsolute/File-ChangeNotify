@@ -30,10 +30,11 @@ coerce $array_of_dirs
     => via { [ $_ ] };
 
 has directories =>
-    ( is      => 'ro',
-      isa     => $array_of_dirs,
+    ( is       => 'rw',
+      writer   => '_set_directories',
+      isa      => $array_of_dirs,
       required => 1,
-      coerce  => 1,
+      coerce   => 1,
     );
 
 has follow_symlinks =>
@@ -84,7 +85,7 @@ sub _remove_directory
     my $self = shift;
     my $dir  = shift;
 
-    $self->directories( [ grep { $_ ne $dir } @{ $self->directories() } ] );
+    $self->_set_directories( [ grep { $_ ne $dir } @{ $self->directories() } ] );
 }
 
 no Moose;

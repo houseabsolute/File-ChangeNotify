@@ -1,3 +1,13 @@
+0.04   2009-05-14
+
+- The Default watcher would blow up when a directory it was watching
+  was later removed. Reported by Tomas Doran.
+
+- The Inotify watcher would generate two events when a directory it
+  was watching was removed, one delete and one unknown, rather than
+  just a delete event.
+
+
 0.03   2009-05-11
 
 - Removed the default value for directories in the Watcher class,
