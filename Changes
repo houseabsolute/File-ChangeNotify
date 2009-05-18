@@ -1,3 +1,11 @@
+0.05   2009-05-17
+
+- Update the Moose::Params::Validate prereq so it requires the version
+  we really need (0.08+).
+
+- Removed Cwd and FindBin from our prereq list.
+
+
 0.04   2009-05-14
 
 - The Default watcher would blow up when a directory it was watching
