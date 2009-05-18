@@ -15,7 +15,7 @@ my $builder =
                            'FindBin'                        => '0',
                            'Module::Pluggable::Object'      => '0',
                            'Moose'                          => '0',
-                           'MooseX::Params::Validate'       => '0',
+                           'MooseX::Params::Validate'       => '0.08',
                            'MooseX::SemiAffordanceAccessor' => '0',
                            'Time::HiRes'                    => '0',
                          },
