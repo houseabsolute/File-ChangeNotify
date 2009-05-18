@@ -7,8 +7,6 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Params::Validate qw( pos_validated_list );
 
-use File::Spec;
-
 has filter =>
     ( is      => 'ro',
       isa     => 'RegexpRef',

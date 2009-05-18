@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use File::Find qw( finddepth );
+use File::Spec;
 use Time::HiRes qw( sleep );
 # Trying to import this just blows up on Win32, and checking
 # Time::HiRes::d_hires_stat() _also_ blows up on Win32.
