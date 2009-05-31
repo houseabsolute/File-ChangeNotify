@@ -77,12 +77,13 @@ File::ChangeNotify - Watch for changes to files, cross-platform style
     my $watcher =
         File::ChangeNotify->instantiate_watcher
             ( directories => [ '/my/path', '/my/other' ],
-              regex       => qr/\.(?:pm|conf|yml)$/,
+              filter      => qr/\.(?:pm|conf|yml)$/,
             );
 
     if ( my @events = $watcher->new_events() ) { ... }
 
-    $watcher->watch($handler);
+    # blocking
+    while ( my @events = $watcher->wait_for_events() ) { ... }
 
 =head1 DESCRIPTION
 
