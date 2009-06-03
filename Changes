@@ -1,3 +1,8 @@
+0.06   2009-06-03
+
+- Created a Makefile.PL from the Build.PL.
+
+
 0.05   2009-05-17
 
 - Update the Moose::Params::Validate prereq so it requires the version
