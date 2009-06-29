@@ -3,6 +3,7 @@ package File::ChangeNotify::Watcher;
 use strict;
 use warnings;
 
+use File::ChangeNotify::Event;
 use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Params::Validate qw( pos_validated_list );
@@ -43,7 +44,7 @@ has follow_symlinks =>
 
 has event_class =>
     ( is      => 'ro',
-      ias     => 'ClassName',
+      isa     => 'ClassName',
       default => 'File::ChangeNotify::Event',
     );
 
