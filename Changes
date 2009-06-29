@@ -1,3 +1,10 @@
+0.07   2009-06-29
+
+- Fixed a typo in File::ChangeNotify::Watcher that causes a warning
+  with newer versions of Moose. Reported by David Raab. Fixes RT
+  #47431.
+
+
 0.06   2009-06-03
 
 - Created a Makefile.PL from the Build.PL.
