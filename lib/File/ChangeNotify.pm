@@ -115,7 +115,7 @@ subclasses.
 
 =head1 AUTHOR
 
-Dave Rolsky, E<gt>autarch@urth.orgE<lt>
+Dave Rolsky, E<lt>autarch@urth.orgE<gt>
 
 =head1 BUGS
 

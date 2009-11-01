@@ -175,7 +175,7 @@ comparisons of the filesystem snapshot it takes.
 
 =head1 AUTHOR
 
-Dave Rolsky, E<gt>autarch@urth.orgE<lt>
+Dave Rolsky, E<lt>autarch@urth.orgE<gt>
 
 =head1 COPYRIGHT & LICENSE
 
