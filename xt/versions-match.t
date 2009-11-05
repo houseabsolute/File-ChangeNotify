@@ -17,10 +17,10 @@ for my $pm_file ( File::Find::Rule->file->name( qr/\.pm$/ )->in('lib' ) )
     $versions{$stripped_file} = $mod->version;
 }
 
-my $moose_ver = $versions{'Fey.pm'};
+my $moose_ver = $versions{'File/ChangeNotify.pm'};
 
-for my $module ( grep { $_ ne 'Fey.pm' } sort keys %versions )
+for my $module ( grep { $_ ne 'File/ChangeNotify.pm' } sort keys %versions )
 {
     is( $versions{$module}, $moose_ver,
-        "version for $module is the same as in Fey.pm" );
+        "version for $module is the same as in File/ChangeNotify.pm" );
 }
