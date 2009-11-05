@@ -9,7 +9,7 @@ MANIFEST
 META.yml
 Makefile.PL
 README
-Debian_CPANTS.txt
+Debian_CPANTS.txt*
 Makefile.PL
 Makefile
 Makefile.old
