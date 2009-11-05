@@ -7,184 +7,189 @@ use IO::KQueue;
 extends 'File::ChangeNotify::Watcher';
 
 has 'absorb_delay' => (
-	is			=> 'ro',
-	isa			=> 'Int',
-	default		=> 100,
+    is      => 'ro',
+    isa     => 'Int',
+    default => 100,
 );
 
 has '_kqueue' => (
-	is			=> 'ro',
-	isa			=> 'IO::KQueue',
-	default		=> sub { IO::KQueue->new },
-	init_arg	=> undef,
+    is       => 'ro',
+    isa      => 'IO::KQueue',
+    default  => sub { IO::KQueue->new },
+    init_arg => undef,
 );
 
 # We need to keep hold of filehandles for all the directories *and* files in the
 # tree. KQueue events will be automatically deleted when the filehandles go out
-# of scope. 
+# of scope.
 has '_files' => (
-	is			=> 'ro',
-	isa			=> 'HashRef',
-	default		=> sub{ {} },
-	init_arg	=> undef,
+    is       => 'ro',
+    isa      => 'HashRef',
+    default  => sub { {} },
+    init_arg => undef,
 );
 
-sub sees_all_events { 0 }
+sub sees_all_events {0}
 
-sub BUILD{
-	my ($self) = @_;
-	$self->_watch_dir($_) for @{$self->directories};
+sub BUILD {
+    my ($self) = @_;
+    $self->_watch_dir($_) for @{ $self->directories };
 }
 
-sub wait_for_events{
-	my ($self) = @_;
+sub wait_for_events {
+    my ($self) = @_;
 
-	while (1){
-		my @events = $self->_get_events;
-		return @events if @events;
-	}
+    while (1) {
+        my @events = $self->_get_events;
+        return @events if @events;
+    }
 }
 
-sub new_events{
-	my ($self) = @_;
-	my @events = $self->_get_events(0);
+sub new_events {
+    my ($self) = @_;
+    my @events = $self->_get_events(0);
 }
 
-sub _get_events{
-	my ($self, $timeout) = @_;
-	
-	my @kevents = $self->_kqueue->kevent($timeout || ());
+sub _get_events {
+    my ( $self, $timeout ) = @_;
 
-	# Events come in groups, wait for a short period to absorb any extra ones
-	# that might happen immediately after the ones we've detected.
-	push @kevents, $self->_kqueue->kevent($self->absorb_delay)
-		if $self->absorb_delay;
-	
-	my @events;
-	foreach my $kevent (@kevents){
+    my @kevents = $self->_kqueue->kevent( $timeout || () );
 
-		my $path	= $kevent->[KQ_UDATA];
-		my $flags	= $kevent->[KQ_FFLAGS];
+    # Events come in groups, wait for a short period to absorb any extra ones
+    # that might happen immediately after the ones we've detected.
+    push @kevents, $self->_kqueue->kevent( $self->absorb_delay )
+        if $self->absorb_delay;
 
-		# Delete - this works reasonably well with KQueue
-		if ($flags & NOTE_DELETE){
-			delete $self->_files->{$path};
-			push @events, $self->_event($path, 'delete');
-		}
+    my @events;
+    foreach my $kevent (@kevents) {
 
-		# Rename - represented as deletes and creates
-		elsif ($flags & NOTE_RENAME){
+        my $path  = $kevent->[KQ_UDATA];
+        my $flags = $kevent->[KQ_FFLAGS];
 
-			# Renamed dirs
-			# Use the stored filehandle (it survives renaming) to identify a dir
-			# and remove any filehandles we're storing to its contents
-			my $fh = $self->_files->{$path};
-			if (-d $fh){
-				foreach my $stored_path (keys %{$self->_files}){
-					next unless index($stored_path, $path) == 0;
-					delete $self->_files->{$stored_path};
-					push @events, $self->_event($stored_path, 'delete');
-				}
-			}
-			# Renamed files
-			else{
-				delete $self->_files->{$path};
-				push @events, $self->_event($path, 'delete');
-			}
-		}
+        # Delete - this works reasonably well with KQueue
+        if ( $flags & NOTE_DELETE ) {
+            delete $self->_files->{$path};
+            push @events, $self->_event( $path, 'delete' );
+        }
 
-		# Modify/Create - writes to files indicate modification, but we get
-		# writes to dirs too, which indicates a file (or dir) was created or
-		# removed from the dir. Deletes are picked up by delete events, but to
-		# find created files we have to scan the dir again.
-		elsif ($flags & NOTE_WRITE){
+        # Rename - represented as deletes and creates
+        elsif ( $flags & NOTE_RENAME ) {
 
-			if (-f $path){
-				push @events, $self->_event($path, 'modify');
-			}
-			elsif (-d $path){
-				push @events, map 
-					{ $self->_event($_, 'create') } 
-					$self->_watch_dir($path);
-			}
-		}
-	}
+            # Renamed dirs
+            # Use the stored filehandle (it survives renaming) to identify a dir
+            # and remove any filehandles we're storing to its contents
+            my $fh = $self->_files->{$path};
+            if ( -d $fh ) {
+                foreach my $stored_path ( keys %{ $self->_files } ) {
+                    next unless index( $stored_path, $path ) == 0;
+                    delete $self->_files->{$stored_path};
+                    push @events, $self->_event( $stored_path, 'delete' );
+                }
+            }
 
-	return @events;
+            # Renamed files
+            else {
+                delete $self->_files->{$path};
+                push @events, $self->_event( $path, 'delete' );
+            }
+        }
+
+        # Modify/Create - writes to files indicate modification, but we get
+        # writes to dirs too, which indicates a file (or dir) was created or
+        # removed from the dir. Deletes are picked up by delete events, but to
+        # find created files we have to scan the dir again.
+        elsif ( $flags & NOTE_WRITE ) {
+
+            if ( -f $path ) {
+                push @events, $self->_event( $path, 'modify' );
+            }
+            elsif ( -d $path ) {
+                push @events,
+                    map { $self->_event( $_, 'create' ) }
+                    $self->_watch_dir($path);
+            }
+        }
+    }
+
+    return @events;
 }
 
-sub _event{
-	my ($self, $path, $type) = @_;
-	return $self->event_class->new(path => $path, type => $type);
+sub _event {
+    my ( $self, $path, $type ) = @_;
+    return $self->event_class->new( path => $path, type => $type );
 }
 
-sub _watch_dir{
-	my ($self, $dir) = @_;
+sub _watch_dir {
+    my ( $self, $dir ) = @_;
 
-	my @new_files;
-	# use find(), finddepth() doesn't support pruning
-	$self->_find($dir, sub{ 
-		my $path = $File::Find::name;
+    my @new_files;
 
-		# Don't monitor anything below excluded dirs
-		return $File::Find::prune = 1
-			if $self->_path_is_excluded($path);
+    # use find(), finddepth() doesn't support pruning
+    $self->_find(
+        $dir,
+        sub {
+            my $path = $File::Find::name;
 
-		# Skip file names that don't match the filter
-		return unless $self->_is_included_file($path);
+            # Don't monitor anything below excluded dirs
+            return $File::Find::prune = 1
+                if $self->_path_is_excluded($path);
 
-		# Skip if we're watching it already
-		return if $self->_files->{$path};
+            # Skip file names that don't match the filter
+            return unless $self->_is_included_file($path);
 
-		$self->_watch_file($path);
-		push @new_files, $path;
-	});
+            # Skip if we're watching it already
+            return if $self->_files->{$path};
 
-	return @new_files;
+            $self->_watch_file($path);
+            push @new_files, $path;
+        }
+    );
+
+    return @new_files;
 }
 
-sub _is_included_file{
-    my ($self, $path) = @_;
+sub _is_included_file {
+    my ( $self, $path ) = @_;
 
-	return 1 if -d $path;
+    return 1 if -d $path;
 
-    my $filter = $self->filter;
+    my $filter   = $self->filter;
     my $filename = ( File::Spec->splitpath($path) )[2];
     return 1 if $filename =~ m{$filter};
 }
 
-sub _find{
-	my ($self, $dir, $wanted) = @_;
-	File::Find::find(
-		{
-			wanted		=> $wanted,
-			no_chdir	=> 1,
-			follow_fast => ($self->follow_symlinks ? 1 : 0),
-		},
-		$dir,
-	);
+sub _find {
+    my ( $self, $dir, $wanted ) = @_;
+    File::Find::find(
+        {
+            wanted      => $wanted,
+            no_chdir    => 1,
+            follow_fast => ( $self->follow_symlinks ? 1 : 0 ),
+        },
+        $dir,
+    );
 }
 
-sub _watch_file{
-	my ($self, $file) = @_;
+sub _watch_file {
+    my ( $self, $file ) = @_;
 
-	# Don't panic if we can't open a file
-	open my $fh, '<', $file or warn "Can't open '$file': $!";
-	return unless $fh;
+    # Don't panic if we can't open a file
+    open my $fh, '<', $file or warn "Can't open '$file': $!";
+    return unless $fh;
 
-	# Store this filehandle (this will automatically nuke any existing events
-	# assigned to the file)
-	$self->_files->{$file} = $fh;
+    # Store this filehandle (this will automatically nuke any existing events
+    # assigned to the file)
+    $self->_files->{$file} = $fh;
 
-	# Watch it for changes
-	$self->_kqueue->EV_SET(
-		fileno($fh), 
-		EVFILT_VNODE,
-		EV_ADD | EV_CLEAR,
-		NOTE_DELETE | NOTE_WRITE | NOTE_RENAME | NOTE_REVOKE,
-		0,
-		$file,
-	);
+    # Watch it for changes
+    $self->_kqueue->EV_SET(
+        fileno($fh),
+        EVFILT_VNODE,
+        EV_ADD | EV_CLEAR,
+        NOTE_DELETE | NOTE_WRITE | NOTE_RENAME | NOTE_REVOKE,
+        0,
+        $file,
+    );
 }
 
 no Moose;

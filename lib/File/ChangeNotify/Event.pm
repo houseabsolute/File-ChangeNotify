@@ -6,17 +6,17 @@ use warnings;
 use Moose;
 use Moose::Util::TypeConstraints;
 
-has path =>
-    ( is       => 'ro',
-      isa      => 'Str',
-      required => 1,
-    );
+has path => (
+    is       => 'ro',
+    isa      => 'Str',
+    required => 1,
+);
 
-has type =>
-    ( is       => 'ro',
-      isa      => enum( [ qw( create modify delete unknown ) ] ),
-      required => 1,
-    );
+has type => (
+    is       => 'ro',
+    isa      => enum( [qw( create modify delete unknown )] ),
+    required => 1,
+);
 
 no Moose;
 no Moose::Util::TypeConstraints;

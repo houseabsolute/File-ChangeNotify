@@ -9,30 +9,26 @@ use Carp qw( confess );
 use Class::MOP;
 use Module::Pluggable::Object;
 
-sub instantiate_watcher
-{
+sub instantiate_watcher {
     my $class = shift;
 
-    for my $class ( $class->_all_classes() )
-    {
-        if ( _try_load($class) )
-        {
+    for my $class ( $class->_all_classes() ) {
+        if ( _try_load($class) ) {
             return $class->new(@_);
         }
     }
 
-    die "Could not load a File::ChangeNotify::Watcher subclass (this should not happen, something is badly broken)";
+    die
+        "Could not load a File::ChangeNotify::Watcher subclass (this should not happen, something is badly broken)";
 }
 
-sub usable_classes
-{
+sub usable_classes {
     my $class = shift;
 
     return grep { _try_load($_) } $class->_all_classes();
 }
 
-sub _try_load
-{
+sub _try_load {
     my $class = shift;
 
     eval { Class::MOP::load_class($class) };
@@ -43,21 +39,17 @@ sub _try_load
     return $e ? 0 : 1;
 }
 
-my $finder =
-    Module::Pluggable::Object->new( search_path => 'File::ChangeNotify::Watcher' );
+my $finder = Module::Pluggable::Object->new(
+    search_path => 'File::ChangeNotify::Watcher' );
 
-sub _all_classes
-{
+sub _all_classes {
     return sort _sort_classes $finder->plugins();
 }
 
-sub _sort_classes
-{
-      $a eq 'File::ChangeNotify::Watcher::Default'
-    ? 1
-    : $b eq 'File::ChangeNotify::Watcher::Default'
-    ? -1
-    : $a cmp $b;
+sub _sort_classes {
+          $a eq 'File::ChangeNotify::Watcher::Default' ? 1
+        : $b eq 'File::ChangeNotify::Watcher::Default' ? -1
+        :                                                $a cmp $b;
 }
 
 1;
