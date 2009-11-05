@@ -1,3 +1,13 @@
+0.08   2009-11-05
+
+- Added a new exclude feature that allows you to excludes files or directories
+  outright. Implemented by Dan Thomas. RT #51062.
+
+- Added a KQueue-based watcher written by Dan Thomas. I have no idea if this
+  works, as I don't have BSD, but we'll assume he ran the tests on his system
+  ;) RT #51062.
+
+
 0.07   2009-06-29
 
 - Fixed a typo in File::ChangeNotify::Watcher that causes a warning
