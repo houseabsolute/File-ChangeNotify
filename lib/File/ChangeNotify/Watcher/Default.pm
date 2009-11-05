@@ -164,9 +164,8 @@ File::ChangeNotify::Watcher::Default - Fallback default watcher subclass
 
 =head1 DESCRIPTION
 
-This class implements watching by comparing two snapshopts of the
-filesystem tree. It if inefficient and dumb, and so it is the subclass
-of last resort.
+This class implements watching by comparing two snapshots of the filesystem
+tree. It if inefficient and dumb, and so it is the subclass of last resort.
 
 Its C<< $watcher->wait_for_events() >> method sleeps between
 comparisons of the filesystem snapshot it takes.
