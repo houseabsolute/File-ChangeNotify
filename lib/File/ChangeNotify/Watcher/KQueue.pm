@@ -1,5 +1,11 @@
 package File::ChangeNotify::Watcher::KQueue;
+
+use strict;
+use warnings;
+
 use Moose;
+
+our $VERSION = '0.07';
 
 use File::Find ();
 use IO::KQueue;
