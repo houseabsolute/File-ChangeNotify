@@ -223,6 +223,12 @@ open with C<kern.openfiles>.
 
 Dan Thomas, E<lt>dan@cpan.orgE<gt>
 
+=head1 SUPPORT
+
+I (Dave Rolsky) cannot test this class, as I have no BSD systems. Reasonable
+patches will be applied as-is, and when possible I will consult with Dan
+Thomas or other BSD users before releasing.
+
 =head1 LICENSE
 
 Copyright 2009 Dan Thomas, All Rights Reserved.
