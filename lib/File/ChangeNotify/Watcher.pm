@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use File::ChangeNotify::Event;
+use List::MoreUtils qw(all);
 use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Params::Validate qw( pos_validated_list );
@@ -54,6 +55,14 @@ has sleep_interval =>
       default => 2,
     );
 
+my $files_or_regexps = subtype as 'ArrayRef[Str|RegexpRef]';
+
+has exclude => 
+    ( is      => 'ro',
+      isa     => $files_or_regexps,
+      default => sub{ [] },
+      coerce  => 1,
+    );
 
 sub BUILD
 {
@@ -77,6 +86,23 @@ sub _add_directory
     return if grep { $_ eq $dir } $self->directories();
 
     push @{ $self->directories() }, $dir;
+}
+
+sub _path_is_excluded {
+    my $self = shift;
+    my $path = shift;
+
+    foreach my $excluded (@{$self->exclude}){
+
+        if (ref $excluded && ref $excluded eq 'Regexp'){
+            return 1 if $path =~ /$excluded/;
+        }
+        else{
+            return 1 if $path eq $excluded;
+        }
+    }
+
+    return;
 }
 
 sub _remove_directory
@@ -107,6 +133,7 @@ File::ChangeNotify::Watcher - Base class for all watchers
         File::ChangeNotify->instantiate_watcher
             ( directories => [ '/my/path', '/my/other' ],
               filter      => qr/\.(?:pm|conf|yml)$/,
+              exclude     => ['t', 'root', qr(/(?!\.)[^/]+$)],
             );
 
     if ( my @events = $watcher->new_events() ) { ... }
@@ -149,13 +176,21 @@ This method creates a new watcher. It accepts the following arguments:
 This argument is required. It can be either one or many paths which
 should be watched for changes.
 
-=item * regex => qr/.../
+=item * filter => qr/.../
 
 This is an optional regular expression that will be used to check if a
-file is of interest. This filter is only applied to files, directories
-are always included.
+file is of interest. This filter is only applied to files.
 
-By default, all files are included as well.
+By default, all files are included.
+
+=item * exclude => [...]
+
+An optional list of paths to exclude. This list can contain either plain
+strings or regular expressions. If you provide a string it should contain the
+complete path to be excluded.
+
+The paths can be either directories or specific files. If the exclusion
+matches a directory, all of its files and subdirectories are ignored.
 
 =item * follow_symlinks => $bool
 

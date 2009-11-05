@@ -37,16 +37,24 @@ sub _build_map
 
     my %map;
 
-    finddepth
-        ( { wanted      => sub { my $path = $File::Find::name;
-                                 my $entry = $self->_entry_for_map($path) or return;
-                                 $map{$path} = $entry;
-                               },
+    File::Find::find( 
+        { 
+            wanted => sub { 
+                my $path = $File::Find::name;
+
+                if ($self->_path_is_excluded($path)){
+                    $File::Find::prune = 1;
+                    return;
+                }
+
+                my $entry = $self->_entry_for_map($path) or return;
+                $map{$path} = $entry;
+            },
             follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
             no_chdir    => 1
-          },
-          @{ $self->directories() },
-       );
+        },
+        @{ $self->directories() },
+    );
 
     return \%map;
 }
