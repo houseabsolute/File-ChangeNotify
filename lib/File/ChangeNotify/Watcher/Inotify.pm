@@ -116,10 +116,12 @@ sub _watch_directory {
         {
             wanted => sub {
                 my $path = $File::Find::name;
-                if ( $self->_path_is_excluded() ) {
+
+                if ( $self->_path_is_excluded($path) ) {
                     $File::Find::prune = 1;
                     return;
                 }
+
                 $self->_add_watch_if_dir($path);
             },
             follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
@@ -136,7 +138,7 @@ sub _add_watch_if_dir {
     return if -l $path && !$self->follow_symlinks();
 
     return unless -d $path;
-    return if $self->_is_excluded($path);
+    return if $self->_path_is_excluded($path);
 
     $self->_inotify()->watch( $path, $self->_mask() );
 }
@@ -154,7 +156,7 @@ sub _fake_events_for_new_dir {
                 my $path = $File::Find::name;
 
                 return if $path eq $dir;
-                if ( $self->_is_excluded($path) ) {
+                if ( $self->_path_is_excluded($path) ) {
                     $File::Find::prune = 1;
                     return;
                 }
