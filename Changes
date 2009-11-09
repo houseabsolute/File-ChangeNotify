@@ -1,3 +1,10 @@
+0.09   2009-11-09
+
+- This release fixes the excluded-dirs.t under Windows. There are no other
+  changes in this release, so there's no need to upgrade if you have 0.08
+  installed. Patch by Taro Nishino. RT #51161.
+
+
 0.08   2009-11-05
 
 - Added a new exclude feature that allows you to excludes files or directories
