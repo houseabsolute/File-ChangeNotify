@@ -3,7 +3,7 @@ package File::ChangeNotify::Event;
 use strict;
 use warnings;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Moose;
 use Moose::Util::TypeConstraints;
