@@ -12,7 +12,7 @@ use Module::Pluggable::Object;
 sub instantiate_watcher {
     my $class = shift;
 
-    for my $class ( $class->_all_classes() ) {
+    for my $class ( $class->usable_classes() ) {
         if ( _try_load($class) ) {
             return $class->new(@_);
         }
@@ -22,10 +22,15 @@ sub instantiate_watcher {
         "Could not load a File::ChangeNotify::Watcher subclass (this should not happen, something is badly broken)";
 }
 
-sub usable_classes {
-    my $class = shift;
+{
+    my @usable_classes = ();
 
-    return grep { _try_load($_) } $class->_all_classes();
+    sub usable_classes {
+        my $class = shift;
+
+        return @usable_classes if @usable_classes;
+        return @usable_classes = grep { _try_load($_) } $class->_all_classes();
+    }
 }
 
 sub _try_load {
@@ -34,7 +39,7 @@ sub _try_load {
     eval { Class::MOP::load_class($class) };
 
     my $e = $@;
-    die $e if $e && $e !~ /Can\'t locate/;
+    die $e if $e && $e !~ /Can\'t locate|did not return a true value/;
 
     return $e ? 0 : 1;
 }

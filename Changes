@@ -1,3 +1,11 @@
+0.10   2009-12-06
+
+- Attempting to instantiate more than one watcher failed if you were on a
+  system where one of the watcher subclasses could not be loaded (which is
+  basically every system because no system has both inotify and kqueue). Patch
+  by Mark Grimes. RT #52477.
+
+
 0.09   2009-11-09
 
 - This release fixes the excluded-dirs.t under Windows. There are no other
