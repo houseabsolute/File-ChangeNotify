@@ -1,3 +1,10 @@
+0.11   2009-12-07
+
+- A test attempted to use Test::Without::Module but this wasn't in the prereq
+  list. I've made the test check for the module and skip its tests if the
+  module isn't present. Reported by Leon Brocard. RT #52539.
+
+
 0.10   2009-12-06
 
 - Attempting to instantiate more than one watcher failed if you were on a
