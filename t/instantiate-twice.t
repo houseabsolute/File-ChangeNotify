@@ -1,8 +1,12 @@
 use strict;
 use warnings;
 
-use Test::Without::Module qw( Linux::Inotify2 );
-use Test::More tests => 2;
+use Test::More;
+
+eval 'use Test::Without::Module qw( Linux::Inotify2 )';
+plan skip_all => 'This test requires Test::Without::Module' if $@;
+
+plan tests => 2;
 
 use File::ChangeNotify;
 
