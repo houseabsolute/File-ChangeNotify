@@ -24,6 +24,12 @@ my $builder =
           create_readme => 1,
           sign          => 1,
           create_makefile_pl => 'traditional',
+          meta_merge =>
+              { resources =>
+                    { bugtracker => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=File-ChangeNotify',
+                      repository => 'http://hg.urth.org/hg/File-ChangeNotify',
+                    },
+              },
         );
 
 $builder->create_build_script();
