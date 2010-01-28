@@ -6,7 +6,7 @@ use warnings;
 our $VERSION = '0.11';
 
 use File::Find ();
-use Linux::Inotify2;
+use Linux::Inotify2 1.2;
 
 use Moose;
 
