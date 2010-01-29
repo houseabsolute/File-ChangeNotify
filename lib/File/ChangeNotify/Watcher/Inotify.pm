@@ -3,7 +3,7 @@ package File::ChangeNotify::Watcher::Inotify;
 use strict;
 use warnings;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 use File::Find ();
 use Linux::Inotify2 1.2;
