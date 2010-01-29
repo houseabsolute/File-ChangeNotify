@@ -1,3 +1,12 @@
+0.12   2010-01-28
+
+- Added auto_features to the Build.PL, which will give hints on what modules
+  to install for KQueue and Inotify support.
+
+- Require Linux::Inotify 1.2+, since 1.1 apparently doesn't work with this
+  module. Reported by Michael Grondin. RT #54069.
+
+
 0.11   2009-12-07
 
 - A test attempted to use Test::Without::Module but this wasn't in the prereq
