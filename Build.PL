@@ -29,7 +29,7 @@ my $builder = Module::Build->new(
         },
         KQueue => {
             description => 'KQueue support',
-            requires    => { 'IO::Kqueue' => '0' },
+            requires    => { 'IO::KQueue' => '0' },
         },
     },
     create_readme      => 1,
