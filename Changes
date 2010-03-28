@@ -1,3 +1,11 @@
+0.13   2010-03-28
+
+- Circular symlinks would cause instantiating a watcher to die with an error
+  from File::Find. These are now ignored. Reported by Jon Schutz. RT #55883.
+
+- Fixed misspelling of IO::KQueue in auto features
+
+
 0.12   2010-01-28
 
 - Added auto_features to the Build.PL, which will give hints on what modules
