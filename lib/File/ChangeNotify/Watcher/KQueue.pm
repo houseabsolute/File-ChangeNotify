@@ -5,7 +5,7 @@ use warnings;
 
 use Moose;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use File::Find ();
 use IO::KQueue;

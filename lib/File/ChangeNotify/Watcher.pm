@@ -3,7 +3,7 @@ package File::ChangeNotify::Watcher;
 use strict;
 use warnings;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 use File::ChangeNotify::Event;
 use List::MoreUtils qw(all);
