@@ -7,8 +7,6 @@ use File::Spec;
 
 use Test::More;
 
-plan tests => 6;
-
 my $root = File::Spec->catfile( $FindBin::Bin, '..' );
 sub f { File::Spec->catfile( $root, @_ ) }
 
@@ -41,3 +39,5 @@ ok(
     !$watcher->_path_is_excluded( f( '.hidden', 'file' ) ),
     'hidden dir regex does not exclude subdirs'
 );
+
+done_testing();

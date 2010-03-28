@@ -6,8 +6,6 @@ use Test::More;
 eval 'use Test::Without::Module qw( Linux::Inotify2 )';
 plan skip_all => 'This test requires Test::Without::Module' if $@;
 
-plan tests => 2;
-
 use File::ChangeNotify;
 
 
@@ -22,3 +20,5 @@ ok(
     $watcher2->isa('File::ChangeNotify::Watcher'),
     'second isa File::ChangeNotify::Watcher'
 );
+
+done_testing();
