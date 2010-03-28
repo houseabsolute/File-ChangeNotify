@@ -127,7 +127,8 @@ sub _watch_directory {
                 $self->_add_watch_if_dir($path);
             },
             follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
-            no_chdir => 1
+            no_chdir    => 1,
+            follow_skip => 2,
         },
         $dir
     );

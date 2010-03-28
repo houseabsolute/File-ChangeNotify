@@ -170,7 +170,8 @@ sub _find {
         {
             wanted      => $wanted,
             no_chdir    => 1,
-            follow_fast => ( $self->follow_symlinks ? 1 : 0 ),
+            follow_fast => ( $self->follow_symlinks ? 1 : 0 ),,
+            follow_skip => 2,
         },
         $dir,
     );

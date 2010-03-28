@@ -6,6 +6,8 @@ use warnings;
 use File::ChangeNotify;
 use File::Temp qw( tempdir );
 use File::Path qw( mkpath rmtree );
+
+use Test::Exception;
 use Test::More;
 
 use base 'Exporter';
@@ -17,8 +19,6 @@ our $_DESC;
 sub run_tests {
     my @classes = File::ChangeNotify->usable_classes();
 
-    plan tests => 31 * @classes;
-
     for my $class (@classes) {
         ( my $short = $class ) =~ s/^File::ChangeNotify::Watcher:://;
 
@@ -29,6 +29,8 @@ sub run_tests {
         _shared_tests( $class, \&_nonblocking );
         _symlink_tests($class);
     }
+
+    done_testing();
 }
 
 sub _blocking {
@@ -333,6 +335,20 @@ SKIP:
             ],
             'one event for symlinked dir when following symlinks',
         );
+
+        my $dir3 = tempdir( CLEANUP => 1 );
+
+        symlink "$dir3/..",              "$dir3/top";
+        symlink "$dir3/input-circular1", "$dir3/input-circular2";
+        symlink "$dir3/input-circular2", "$dir3/input-circular1";
+
+        lives_ok {
+            File::ChangeNotify->instantiate_watcher(
+                directories     => $dir3,
+                follow_symlinks => 1,
+            );
+        }
+        'made watcher for directory with circular symlinks';
     }
 }
 

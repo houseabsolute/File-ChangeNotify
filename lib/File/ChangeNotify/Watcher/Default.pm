@@ -53,7 +53,8 @@ sub _build_map {
                 $map{$path} = $entry;
             },
             follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
-            no_chdir => 1
+            no_chdir    => 1,
+            follow_skip => 2,
         },
         @{ $self->directories() },
     );
