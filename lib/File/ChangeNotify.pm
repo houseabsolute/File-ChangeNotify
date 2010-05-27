@@ -110,6 +110,17 @@ is a better option.
 Returns a list of all the loadable L<File::ChangeNotify::Watcher>
 subclasses.
 
+=head1 AUTHOR
+
+Dave Rolsky, E<lt>autarch@urth.orgE<gt>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to
+C<bug-file-changenotify@rt.cpan.org>, or through the web interface at
+L<http://rt.cpan.org>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
+
 =head1 DONATIONS
 
 If you'd like to thank me for the work I've done on this module,
@@ -130,17 +141,6 @@ best.
 To donate, log into PayPal and send money to autarch@urth.org or use
 the button on this page:
 L<http://www.urth.org/~autarch/fs-donation.html>
-
-=head1 AUTHOR
-
-Dave Rolsky, E<lt>autarch@urth.orgE<gt>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to
-C<bug-file-changenotify@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
 
 =head1 COPYRIGHT & LICENSE
 
