@@ -2,8 +2,7 @@ package File::ChangeNotify::Watcher::Inotify;
 
 use strict;
 use warnings;
-
-our $VERSION = '0.13';
+use namespace::autoclean;
 
 use File::Find ();
 use Linux::Inotify2 1.2;
@@ -193,17 +192,13 @@ sub _convert_event {
     );
 }
 
-no Moose;
-
 __PACKAGE__->meta()->make_immutable();
 
 1;
 
+# ABSTRACT: Inotify-based watcher subclass
+
 __END__
-
-=head1 NAME
-
-File::ChangeNotify::Watcher::Inotify - Inotify-based watcher subclass
 
 =head1 DESCRIPTION
 
@@ -212,16 +207,5 @@ module. This only works on Linux 2.6.13 or newer.
 
 This watcher is much more efficient and accurate than the
 C<File::ChangeNotify::Watcher::Default> class.
-
-=head1 AUTHOR
-
-Dave Rolsky, E<lt>autarch@urth.orgE<gt>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Dave Rolsky, All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
 
 =cut

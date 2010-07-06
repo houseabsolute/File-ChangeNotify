@@ -2,8 +2,7 @@ package File::ChangeNotify::Watcher;
 
 use strict;
 use warnings;
-
-our $VERSION = '0.13';
+use namespace::autoclean;
 
 use File::ChangeNotify::Event;
 use List::MoreUtils qw(all);
@@ -108,19 +107,13 @@ sub _remove_directory {
         [ grep { $_ ne $dir } @{ $self->directories() } ] );
 }
 
-no Moose;
-no Moose::Util::TypeConstraints;
-no MooseX::Params::Validate;
-
 __PACKAGE__->meta()->make_immutable();
 
 1;
 
+# ABSTRACT: Base class for all watchers
+
 __END__
-
-=head1 NAME
-
-File::ChangeNotify::Watcher - Base class for all watchers
 
 =head1 SYNOPSIS
 
@@ -233,16 +226,5 @@ and can only detect changes between snapshots of the file system.
 
 Other watchers, like the Inotify subclass, see all events that happen
 and report on them.
-
-=head1 AUTHOR
-
-Dave Rolsky, E<lt>autarch@urth.orgE<gt>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Dave Rolsky, All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
 
 =cut

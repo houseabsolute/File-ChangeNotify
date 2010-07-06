@@ -3,8 +3,6 @@ package File::ChangeNotify;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
-
 use Carp qw( confess );
 use Class::MOP;
 use Module::Pluggable::Object;
@@ -59,13 +57,11 @@ sub _sort_classes {
 
 1;
 
+# ABSTRACT: Watch for changes to files, cross-platform style
+
 __END__
 
 =pod
-
-=head1 NAME
-
-File::ChangeNotify - Watch for changes to files, cross-platform style
 
 =head1 SYNOPSIS
 
@@ -110,10 +106,6 @@ is a better option.
 Returns a list of all the loadable L<File::ChangeNotify::Watcher>
 subclasses.
 
-=head1 AUTHOR
-
-Dave Rolsky, E<lt>autarch@urth.orgE<gt>
-
 =head1 BUGS
 
 Please report any bugs or feature requests to
@@ -141,12 +133,5 @@ best.
 To donate, log into PayPal and send money to autarch@urth.org or use
 the button on this page:
 L<http://www.urth.org/~autarch/fs-donation.html>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Dave Rolsky, All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
 
 =cut

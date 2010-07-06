@@ -2,10 +2,9 @@ package File::ChangeNotify::Watcher::KQueue;
 
 use strict;
 use warnings;
+use namespace::autoclean;
 
 use Moose;
-
-our $VERSION = '0.13';
 
 use File::Find ();
 use IO::KQueue;
@@ -199,14 +198,9 @@ sub _watch_file {
     );
 }
 
-no Moose;
 __PACKAGE__->meta->make_immutable;
 
 1;
-
-=head1 NAME
-
-File::ChangeNotify::Watcher::KQueue - KQueue-based watcher for BSD systems.
 
 =head1 DESCRIPTION
 
@@ -226,15 +220,15 @@ necessary. The important keys are: C<kern.maxfiles> and
 C<kern.maxfilesperproc>.  You can see how many files your system current has
 open with C<kern.openfiles>.
 
-=head1 AUTHOR
-
-Dan Thomas, E<lt>dan@cpan.orgE<gt>
-
 =head1 SUPPORT
 
 I (Dave Rolsky) cannot test this class, as I have no BSD systems. Reasonable
 patches will be applied as-is, and when possible I will consult with Dan
 Thomas or other BSD users before releasing.
+
+=head1 AUTHOR
+
+Dan Thomas, E<lt>dan@cpan.orgE<gt>
 
 =head1 LICENSE
 

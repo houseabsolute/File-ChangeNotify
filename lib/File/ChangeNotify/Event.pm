@@ -2,8 +2,7 @@ package File::ChangeNotify::Event;
 
 use strict;
 use warnings;
-
-our $VERSION = '0.13';
+use namespace::autoclean;
 
 use Moose;
 use Moose::Util::TypeConstraints;
@@ -20,18 +19,13 @@ has type => (
     required => 1,
 );
 
-no Moose;
-no Moose::Util::TypeConstraints;
-
 __PACKAGE__->meta()->make_immutable();
 
 1;
 
+# ABSTRACT: Class for file change events
+
 __END__
-
-=head1 NAME
-
-File::ChangeNotify::Event - Class for file change events
 
 =head1 SYNOPSIS
 
@@ -71,16 +65,5 @@ Returns the path of the changed file or directory.
 =head2 $event->type()
 
 Returns the type of event.
-
-=head1 AUTHOR
-
-Dave Rolsky, E<lt>autarch@urth.orgE<gt>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Dave Rolsky, All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
 
 =cut

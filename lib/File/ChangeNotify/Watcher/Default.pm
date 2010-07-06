@@ -2,8 +2,7 @@ package File::ChangeNotify::Watcher::Default;
 
 use strict;
 use warnings;
-
-our $VERSION = '0.13';
+use namespace::autoclean;
 
 use File::Find qw( finddepth );
 use File::Spec;
@@ -153,17 +152,13 @@ sub _interesting_events {
     return @interesting;
 }
 
-no Moose;
-
 __PACKAGE__->meta()->make_immutable();
 
 1;
 
+# ABSTRACT: Fallback default watcher subclass
+
 __END__
-
-=head1 NAME
-
-File::ChangeNotify::Watcher::Default - Fallback default watcher subclass
 
 =head1 DESCRIPTION
 
@@ -172,16 +167,5 @@ tree. It if inefficient and dumb, and so it is the subclass of last resort.
 
 Its C<< $watcher->wait_for_events() >> method sleeps between
 comparisons of the filesystem snapshot it takes.
-
-=head1 AUTHOR
-
-Dave Rolsky, E<lt>autarch@urth.orgE<gt>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Dave Rolsky, All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
 
 =cut
