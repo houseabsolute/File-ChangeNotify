@@ -202,6 +202,10 @@ __PACKAGE__->meta->make_immutable;
 
 1;
 
+# ABSTRACT: KQueue-based watcher subclass
+
+__END__
+
 =head1 DESCRIPTION
 
 This class implements watching using KQueue. This is a BSD alternative to
