@@ -1,3 +1,9 @@
+0.14   2010-07-06
+
+- Running the tests left behind a lot of temp directories that should have
+  been cleaned up, but weren't. Reported by Peter Edwards. RT #59125.
+
+
 0.13   2010-03-28
 
 - Circular symlinks would cause instantiating a watcher to die with an error
