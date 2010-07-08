@@ -5,6 +5,7 @@ blib*
 cover_db*
 Build
 _build
+.build
 MANIFEST
 META.yml
 MYMETA.yml
@@ -15,3 +16,4 @@ Makefile.PL
 Makefile
 Makefile.old
 pm_to_blib*
+File-ChangeNotify-*
