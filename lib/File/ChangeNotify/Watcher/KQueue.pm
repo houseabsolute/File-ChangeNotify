@@ -210,8 +210,9 @@ File::ChangeNotify::Watcher::KQueue - KQueue-based watcher subclass
 
 =head1 DESCRIPTION
 
-This class implements watching using KQueue. This is a BSD alternative to
-Linux's Inotify and similar event-based systems.
+This class implements watching using L<IO::KQueue>, which must be installed
+for it to work. This is a BSD alternative to Linux's Inotify and similar
+event-based systems.
 
 =head1 CAVEATS
 
