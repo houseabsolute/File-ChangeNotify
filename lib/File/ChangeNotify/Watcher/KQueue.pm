@@ -202,9 +202,11 @@ __PACKAGE__->meta->make_immutable;
 
 1;
 
-# ABSTRACT: KQueue-based watcher subclass
-
 __END__
+
+=head1 NAME
+
+File::ChangeNotify::Watcher::KQueue - KQueue-based watcher subclass
 
 =head1 DESCRIPTION
 
@@ -234,11 +236,12 @@ Thomas or other BSD users before releasing.
 
 Dan Thomas, E<lt>dan@cpan.orgE<gt>
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2009 Dan Thomas, All Rights Reserved.
+This software is Copyright (c) 2010 by Dave Rolsky.
 
-This program is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself.
+This is free software, licensed under:
+
+  The Artistic License 2.0
 
 =cut
