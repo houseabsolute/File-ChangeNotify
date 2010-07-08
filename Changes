@@ -3,6 +3,8 @@
 - Running the tests left behind a lot of temp directories that should have
   been cleaned up, but weren't. Reported by Peter Edwards. RT #59125.
 
+- License is now Artistic 2.0
+
 
 0.13   2010-03-28
 
