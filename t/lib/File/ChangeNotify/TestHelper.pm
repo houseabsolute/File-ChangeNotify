@@ -338,7 +338,7 @@ SKIP:
 
         my $dir3 = tempdir( CLEANUP => 1 );
 
-        symlink "$dir3/..",              "$dir3/top";
+        symlink "$dir3/.",              "$dir3/self";
         symlink "$dir3/input-circular1", "$dir3/input-circular2";
         symlink "$dir3/input-circular2", "$dir3/input-circular1";
 
