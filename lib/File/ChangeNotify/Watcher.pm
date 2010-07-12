@@ -58,7 +58,6 @@ has exclude => (
     is      => 'ro',
     isa     => $files_or_regexps,
     default => sub { [] },
-    coerce  => 1,
 );
 
 sub BUILD {
