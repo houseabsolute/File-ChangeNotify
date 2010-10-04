@@ -1,3 +1,8 @@
+0.18
+
+- Always make a Default watcher object if we cannot load an OS-specific class.
+
+
 0.17   2010-10-04
 
 - Loading File::ChangeNotify always loads the Default watcher class. This will
