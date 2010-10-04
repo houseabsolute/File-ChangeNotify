@@ -5,6 +5,8 @@ use warnings;
 
 use Carp qw( confess );
 use Class::MOP;
+# We load this up front to make sure that the prereq modules are installed.
+use File::ChangeNotify::Watcher::Default;
 use Module::Pluggable::Object;
 
 sub instantiate_watcher {
