@@ -1,6 +1,8 @@
-0.18
+0.18   2010-10-15
 
 - Always make a Default watcher object if we cannot load an OS-specific class.
+
+- Add Test::Exception as a test prereq.
 
 
 0.17   2010-10-04
