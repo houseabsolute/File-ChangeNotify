@@ -1,3 +1,10 @@
+0.19   2010-10-17
+
+- The all.t test didn't run any tests at all if neither the Inotify nor KQueue
+  watchers could be loaded. This was treated as a failure by test
+  harnesses. Now we always test the Default class.
+
+
 0.18   2010-10-15
 
 - Always make a Default watcher object if we cannot load an OS-specific class.
