@@ -17,7 +17,8 @@ our @EXPORT = qw( run_tests );
 our $_DESC;
 
 sub run_tests {
-    my @classes = File::ChangeNotify->usable_classes();
+    my @classes = 'File::ChangeNotify::Watcher::Default';
+    push @classes, File::ChangeNotify->usable_classes();
 
     for my $class (@classes) {
         ( my $short = $class ) =~ s/^File::ChangeNotify::Watcher:://;
