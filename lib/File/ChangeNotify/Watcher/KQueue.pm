@@ -181,7 +181,7 @@ sub _watch_file {
 
     # Don't panic if we can't open a file
     open my $fh, '<', $file or warn "Can't open '$file': $!";
-    return unless $fh;
+    return unless $fh && defined fileno $fh;
 
     # Store this filehandle (this will automatically nuke any existing events
     # assigned to the file)
@@ -226,6 +226,10 @@ On FreeBSD, you can check (and alter) your system's settings with C<sysctl> if
 necessary. The important keys are: C<kern.maxfiles> and
 C<kern.maxfilesperproc>.  You can see how many files your system current has
 open with C<kern.openfiles>.
+
+On OpenBSD, the C<sysctl> keys are C<kern.maxfiles> and C<kern.nfiles>.
+Per-process limits are set in F</etc/login.conf>. See L<login.conf(5)> for
+details.
 
 =head1 SUPPORT
 
