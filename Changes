@@ -1,3 +1,9 @@
+{{$NEXT}}
+
+- The KQueue watcher checks that a file has a file descriptor to avoid
+  watching closed files. Patch by Adreas Voegele.
+
+
 0.19   2010-10-17
 
 - The all.t test didn't run any tests at all if neither the Inotify nor KQueue
