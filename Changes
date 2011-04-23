@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.20   2011-04-19
+
 - The KQueue watcher checks that a file has a file descriptor to avoid
   watching closed files. Patch by Adreas Voegele.
 
