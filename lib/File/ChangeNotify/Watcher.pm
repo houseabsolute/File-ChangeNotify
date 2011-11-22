@@ -16,18 +16,24 @@ has filter => (
     default => sub {qr/.*/},
 );
 
-my $dir = subtype as 'Str' => where { -d $_ } =>
-    message {"$_ is not a valid directory"};
+#<<<
+my $dir = subtype as 'Str',
+    where { -d $_ },
+    message { "$_ is not a valid directory" };
 
-my $array_of_dirs = subtype
-    as 'ArrayRef[Str]', => where {
-    map {-d} @{$_};
-    } => message {"@{$_} is not a list of valid directories"};
+my $array_of_dirs = subtype as 'ArrayRef[Str]',
+    where {
+        map {-d} @{$_};
+    },
+    message {"@{$_} is not a list of valid directories"};
 
-coerce $array_of_dirs => from $dir => via { [$_] };
+coerce $array_of_dirs,
+    from $dir,
+    via { [$_] };
+#>>>
 
 has directories => (
-    is       => 'rw',
+    is       => 'ro',
     writer   => '_set_directories',
     isa      => $array_of_dirs,
     required => 1,
