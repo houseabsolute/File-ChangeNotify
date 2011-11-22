@@ -25,9 +25,10 @@ has _inotify => (
 );
 
 has _mask => (
-    is         => 'ro',
-    isa        => 'Int',
-    lazy_build => 1,
+    is      => 'ro',
+    isa     => 'Int',
+    lazy    => 1,
+    builder => '_build_mask',
 );
 
 sub sees_all_events {1}
@@ -95,7 +96,7 @@ sub _interesting_events {
         map { $_->can('path') ? $_ : $self->_convert_event($_) } @interesting;
 }
 
-sub _build__mask {
+sub _build_mask {
     my $self = shift;
 
     my $mask
