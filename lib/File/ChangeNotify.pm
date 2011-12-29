@@ -2,6 +2,7 @@ package File::ChangeNotify;
 
 use strict;
 use warnings;
+use 5.010;
 
 use Carp qw( confess );
 use Class::Load qw( load_class );
