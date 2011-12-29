@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Carp qw( confess );
-use Class::MOP;
+use Class::Load qw( load_class );
 # We load this up front to make sure that the prereq modules are installed.
 use File::ChangeNotify::Watcher::Default;
 use Module::Pluggable::Object;
@@ -42,7 +42,7 @@ sub instantiate_watcher {
         return $tried{$class}
             if exists $tried{$class};
 
-        eval { Class::MOP::load_class($class) };
+        eval { load_class($class) };
 
         my $e = $@;
         die $e if $e && $e !~ /Can\'t locate|did not return a true value/;
