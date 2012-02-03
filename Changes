@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.21   2012-02-03
+
 - The implementation of the exclude feature did not work properly in several
   cases. First, for the Inotify and KQueue watchers, when a new directory was
   created that should have been excluded, it was not. Second, it didn't work
