@@ -11,13 +11,13 @@ use IO::KQueue;
 
 extends 'File::ChangeNotify::Watcher';
 
-has 'absorb_delay' => (
+has absorb_delay => (
     is      => 'ro',
     isa     => 'Int',
     default => 100,
 );
 
-has '_kqueue' => (
+has _kqueue => (
     is       => 'ro',
     isa      => 'IO::KQueue',
     default  => sub { IO::KQueue->new },
@@ -27,7 +27,7 @@ has '_kqueue' => (
 # We need to keep hold of filehandles for all the directories *and* files in the
 # tree. KQueue events will be automatically deleted when the filehandles go out
 # of scope.
-has '_files' => (
+has _files => (
     is       => 'ro',
     isa      => 'HashRef',
     default  => sub { {} },
