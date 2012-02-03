@@ -76,6 +76,12 @@ sub _interesting_events {
     # something happens. The restarter will end up calling ->watch
     # again after handling the changes.
     for my $event ( $self->_inotify()->read() ) {
+        # An excluded path will show up here if ...
+        #
+        # Something created a new directory and that directory needs to be
+        # excluded or when the exclusion excludes a file, not a dir.
+        next if $self->_path_is_excluded( $event->fullname() );
+
         if ( $event->IN_CREATE() && $event->IN_ISDIR() ) {
             $self->_watch_directory( $event->fullname() );
             push @interesting, $event;

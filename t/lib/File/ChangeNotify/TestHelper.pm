@@ -28,6 +28,7 @@ sub run_tests {
 
         local $_DESC = "[with $short - nonblocking]";
         _shared_tests( $class, \&_nonblocking );
+        _exclude_tests($class, \&_nonblocking);
         _symlink_tests($class);
     }
 
@@ -286,6 +287,59 @@ sub _dir_add_remove_tests {
     );
 }
 
+sub _exclude_tests {
+    my $class      = shift;
+    my $events_sub = shift;
+
+    my $dir = tempdir( CLEANUP => 1 );
+
+    my $watcher = $class->new(
+        directories     => $dir,
+        follow_symlinks => 0,
+        sleep_interval  => 0,
+        exclude         => [
+            qr/\bignored-dir\b/,
+            qr/\.ignore$/,
+        ],
+    );
+
+    my $included = "$dir/include";
+    create_file($included);
+
+    _check_events(
+        1,
+        [ $events_sub->($watcher) ],
+        [
+            {
+                path => $included,
+                type => 'create',
+            },
+        ],
+        "added/modified/deleted $included",
+    );
+
+    mkpath( "$dir/ignored-dir", 0, 0755 );
+    my $excluded_dir = "$dir/ignored-dir/foo";
+    create_file($excluded_dir);
+
+    _check_events(
+        0,
+        [ $events_sub->($watcher) ],
+        [],
+        "created $excluded_dir - should be ignored",
+    );
+
+    my $excluded_file = "$dir/foo.ignore";
+    create_file($excluded_file);
+
+    _check_events(
+        0,
+        [ $events_sub->($watcher) ],
+        [],
+        "created $excluded_file - should be ignored",
+    );
+}
+
 sub _symlink_tests {
     my $class = shift;
 
@@ -394,6 +448,8 @@ sub _is_events {
 sub create_file {
     my $path = shift;
 
+    diag("Creating $path");
+
     open my $fh, '>', $path
         or die "Cannot write to $path: $!";
     close $fh
@@ -402,6 +458,8 @@ sub create_file {
 
 sub modify_file {
     my $path = shift;
+
+    diag("Modifying $path");
 
     die "No such file $path!\n" unless -f $path;
 
@@ -415,6 +473,8 @@ sub modify_file {
 
 sub delete_file {
     my $path = shift;
+
+    diag("Deleting $path");
 
     die "No such file $path!\n" unless -f $path;
 

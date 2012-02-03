@@ -67,8 +67,9 @@ sub _get_events {
 
     my @events;
     foreach my $kevent (@kevents) {
-
         my $path  = $kevent->[KQ_UDATA];
+        next if $self->_path_is_excluded($path);
+
         my $flags = $kevent->[KQ_FFLAGS];
 
         # Delete - this works reasonably well with KQueue
