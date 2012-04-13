@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.22   2012-04-13
+
 - Remove unnecessary Perl 5.10 requirement.
 
 
