@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+- Remove unnecessary Perl 5.10 requirement.
+
+
 0.21   2012-02-03
 
 - The implementation of the exclude feature did not work properly in several
