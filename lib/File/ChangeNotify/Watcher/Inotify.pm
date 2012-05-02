@@ -72,9 +72,9 @@ sub _interesting_events {
 
     my @interesting;
 
-    # This is a blocking read, so it will not return until
-    # something happens. The restarter will end up calling ->watch
-    # again after handling the changes.
+    # This may be a blocking read, in which case it will not return until
+    # something happens. For Catalyst, the restarter will end up calling
+    # ->watch again after handling the changes.
     for my $event ( $self->_inotify()->read() ) {
         # An excluded path will show up here if ...
         #
