@@ -58,7 +58,7 @@ sub new_events {
 sub _get_events {
     my ( $self, $timeout ) = @_;
 
-    my @kevents = $self->_kqueue->kevent( $timeout || () );
+    my @kevents = $self->_kqueue->kevent( defined $timeout ? $timeout : () );
 
     # Events come in groups, wait for a short period to absorb any extra ones
     # that might happen immediately after the ones we've detected.
