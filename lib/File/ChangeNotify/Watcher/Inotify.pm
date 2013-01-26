@@ -22,7 +22,7 @@ has _inotify => (
     isa     => 'Linux::Inotify2',
     default => sub {
         Linux::Inotify2->new()
-            or die 'Cannot construct a Linux::Inotify2 object';
+            or die "Cannot construct a Linux::Inotify2 object: $!";
     },
     init_arg => undef,
 );
