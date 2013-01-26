@@ -18,9 +18,12 @@ has is_blocking => (
 );
 
 has _inotify => (
-    is       => 'ro',
-    isa      => 'Linux::Inotify2',
-    default  => sub { Linux::Inotify2->new() },
+    is      => 'ro',
+    isa     => 'Linux::Inotify2',
+    default => sub {
+        Linux::Inotify2->new()
+            or die 'Cannot construct a Linux::Inotify2 object';
+    },
     init_arg => undef,
 );
 
