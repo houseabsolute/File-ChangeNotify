@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- The new_events() watcher method blocked when using IO::Kqueue as the watcher
+  backend. Reported and patched by Jun Kuriyama.
+
+
 0.22   2012-04-13
 
 - Remove unnecessary Perl 5.10 requirement.
