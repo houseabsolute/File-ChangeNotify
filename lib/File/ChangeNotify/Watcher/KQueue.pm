@@ -242,12 +242,4 @@ Thomas or other BSD users before releasing.
 
 Dan Thomas, E<lt>dan@cpan.orgE<gt>
 
-=head1 COPYRIGHT AND LICENSE
-
-This software is Copyright (c) 2013 by Dave Rolsky.
-
-This is free software, licensed under:
-
-  The Artistic License 2.0
-
 =cut
