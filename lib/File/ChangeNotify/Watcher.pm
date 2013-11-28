@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use namespace::autoclean;
 
+use Class::Load qw( load_class );
 use File::ChangeNotify::Event;
 use List::MoreUtils qw(all);
 use Moose;
@@ -69,7 +70,7 @@ has exclude => (
 sub BUILD {
     my $self = shift;
 
-    Class::MOP::load_class( $self->event_class() );
+    load_class( $self->event_class() );
 }
 
 sub new_events {
