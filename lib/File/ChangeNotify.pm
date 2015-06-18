@@ -3,8 +3,11 @@ package File::ChangeNotify;
 use strict;
 use warnings;
 
+our $VERSION = '0.25';
+
 use Carp qw( confess );
-use Class::Load qw( load_class );
+use Class::Load qw( try_load_class );
+
 # We load this up front to make sure that the prereq modules are installed.
 use File::ChangeNotify::Watcher::Default;
 use Module::Pluggable::Object;
@@ -12,52 +15,36 @@ use Module::Pluggable::Object;
 sub instantiate_watcher {
     my $class = shift;
 
-    for my $class ( $class->usable_classes() ) {
-        if ( _try_load($class) ) {
-            return $class->new(@_);
-        }
-    }
+    my @usable = $class->usable_classes();
+    return $usable[0]->new(@_) if @usable;
 
     return File::ChangeNotify::Watcher::Default->new(@_);
 }
 
 {
+    my $finder = Module::Pluggable::Object->new(
+        search_path => 'File::ChangeNotify::Watcher' );
     my @usable_classes = ();
 
     sub usable_classes {
         my $class = shift;
 
         return @usable_classes if @usable_classes;
-        return @usable_classes
-            = grep { _try_load($_) } $class->_all_classes();
+        return @usable_classes = grep { _try_load($_) }
+            sort grep { $_ ne 'File::ChangeNotify::Watcher::Default' }
+            $finder->plugins();
     }
 }
 
-{
-    my %tried;
+sub _try_load {
+    my $class = shift;
 
-    sub _try_load {
-        my $class = shift;
+    my ( $ok, $e ) = try_load_class($class);
+    return $class if $ok;
 
-        return $tried{$class}
-            if exists $tried{$class};
-
-        eval { load_class($class) };
-
-        my $e = $@;
-        die $e if $e && $e !~ /Can\'t locate|did not return a true value/;
-
-        return $tried{$class} = $e ? 0 : 1;
-    }
-}
-
-my $finder = Module::Pluggable::Object->new(
-    search_path => 'File::ChangeNotify::Watcher' );
-
-sub _all_classes {
-    return
-        sort grep { $_ ne 'File::ChangeNotify::Watcher::Default' }
-        $finder->plugins();
+    die $e
+        if $e
+        && $e !~ /Can\'t locate|did not return a true value/;
 }
 
 1;
@@ -108,8 +95,8 @@ is a better option.
 
 =head2 File::ChangeNotify->usable_classes()
 
-Returns a list of all the loadable L<File::ChangeNotify::Watcher>
-subclasses.
+Returns a list of all the loadable L<File::ChangeNotify::Watcher> subclasses
+except for L<File::ChangeNotify::Watcher::Default>, which is always usable.
 
 =head1 BUGS
 
