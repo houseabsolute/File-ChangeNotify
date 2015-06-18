@@ -81,6 +81,7 @@ sub _interesting_events {
     # something happens. For Catalyst, the restarter will end up calling
     # ->watch again after handling the changes.
     for my $event ( $self->_inotify()->read() ) {
+
         # An excluded path will show up here if ...
         #
         # Something created a new directory and that directory needs to be
@@ -175,10 +176,11 @@ sub _fake_events_for_new_dir {
                     return;
                 }
 
-                push @events, $self->event_class()->new(
+                push @events,
+                    $self->event_class()->new(
                     path => $path,
                     type => 'create',
-                );
+                    );
             },
             follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
             no_chdir => 1
@@ -199,7 +201,7 @@ sub _convert_event {
               $event->IN_CREATE() ? 'create'
             : $event->IN_MODIFY() ? 'modify'
             : $event->IN_DELETE() ? 'delete'
-            : 'unknown'
+            :                       'unknown'
         ),
     );
 }
