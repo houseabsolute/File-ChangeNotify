@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use namespace::autoclean;
 
+our $VERSION = '0.25';
+
 use File::Find qw( finddepth );
 use File::Spec;
 use Time::HiRes qw( sleep );

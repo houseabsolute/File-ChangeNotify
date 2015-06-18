@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use namespace::autoclean;
 
+our $VERSION = '0.25';
+
 use File::Find ();
 use Linux::Inotify2 1.2;
 
