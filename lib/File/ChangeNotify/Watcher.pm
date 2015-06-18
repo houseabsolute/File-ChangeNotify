@@ -80,15 +80,6 @@ sub new_events {
     return $self->_interesting_events();
 }
 
-sub _add_directory {
-    my $self = shift;
-    my $dir  = shift;
-
-    return if grep { $_ eq $dir } $self->directories();
-
-    push @{ $self->directories() }, $dir;
-}
-
 sub _path_is_excluded {
     my $self = shift;
     my $path = shift;
