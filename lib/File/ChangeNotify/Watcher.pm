@@ -6,7 +6,6 @@ use namespace::autoclean;
 
 use Class::Load qw( load_class );
 use File::ChangeNotify::Event;
-use List::MoreUtils qw(all);
 use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Params::Validate qw( pos_validated_list );
