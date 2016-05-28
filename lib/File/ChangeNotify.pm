@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use namespace::autoclean;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 use Carp qw( confess );
 use Module::Runtime qw( use_module );

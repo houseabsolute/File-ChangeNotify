@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use namespace::autoclean;
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 use Class::Load qw( load_class );
 use File::ChangeNotify::Event;
