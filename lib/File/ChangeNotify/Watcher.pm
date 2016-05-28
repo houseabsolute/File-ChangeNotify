@@ -8,9 +8,10 @@ our $VERSION = '0.25';
 
 use Class::Load qw( load_class );
 use File::ChangeNotify::Event;
-use Moose;
 use Moose::Util::TypeConstraints;
 use MooseX::Params::Validate qw( pos_validated_list );
+
+use Moose::Role;
 
 has filter => (
     is      => 'ro',
@@ -112,11 +113,9 @@ sub _remove_directory {
 }
 ## use critic
 
-__PACKAGE__->meta()->make_immutable();
-
 1;
 
-# ABSTRACT: Base class for all watchers
+# ABSTRACT: Role consumed by all watchers
 
 __END__
 
@@ -137,23 +136,23 @@ __END__
 
 =head1 DESCRIPTION
 
-A C<File::ChangeNotify::Watcher> class monitors a directory for
-changes made to any file. You can provide a regular expression to
-filter out files you are not interested in. It handles the addition of
-new subdirectories by adding them to the watch list.
+A C<File::ChangeNotify::Watcher> monitors a directory for changes made to any
+file. You can provide a regular expression to filter out files you are not
+interested in. It handles the addition of new subdirectories by adding them to
+the watch list.
 
-Note that the actual granularity of what each watcher subclass reports
-may vary across subclasses. Implementations that hook into some sort
-of kernel event interface (Inotify, for example) have much better
-knowledge of exactly what changes are happening than one implemented
-purely in userspace code (like the Default subclass).
+Note that the actual granularity of what each watcher class reports may
+vary. Implementations that hook into some sort of kernel event interface
+(Inotify, for example) have much better knowledge of exactly what changes are
+happening than one implemented purely in userspace code (like the Default
+class).
 
-By default, events are returned in the form
-L<File::ChangeNotify::Event> objects, but this can be overridden by
-providing an "event_class" attribute to the constructor.
+By default, events are returned in the form L<File::ChangeNotify::Event>
+objects, but this can be overridden by providing an "event_class" attribute to
+the constructor.
 
-The watcher can operate in a blocking/callback style, or you can
-simply ask it for a list of new events as needed.
+The watcher can operate in a blocking/callback style, or you can simply ask it
+for a list of new events as needed.
 
 =head1 METHODS
 

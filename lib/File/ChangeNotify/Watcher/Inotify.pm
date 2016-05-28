@@ -11,8 +11,6 @@ use Linux::Inotify2 1.2;
 
 use Moose;
 
-extends 'File::ChangeNotify::Watcher';
-
 has is_blocking => (
     is      => 'ro',
     isa     => 'Bool',
@@ -35,6 +33,8 @@ has _mask => (
     lazy    => 1,
     builder => '_build_mask',
 );
+
+with 'File::ChangeNotify::Watcher';
 
 sub sees_all_events {1}
 
@@ -62,12 +62,13 @@ sub wait_for_events {
     }
 }
 
-override new_events => sub {
+around new_events => sub {
+    my $orig = shift;
     my $self = shift;
 
     $self->_inotify()->blocking(0);
 
-    super();
+    return $self->$orig(@_);
 };
 
 sub _interesting_events {

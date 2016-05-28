@@ -20,7 +20,7 @@ BEGIN {
 use Moose;
 use MooseX::SemiAffordanceAccessor;
 
-extends 'File::ChangeNotify::Watcher';
+with 'File::ChangeNotify::Watcher';
 
 has _map => (
     is      => 'rw',

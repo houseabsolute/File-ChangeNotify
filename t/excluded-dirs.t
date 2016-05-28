@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 use FindBin;
-use File::ChangeNotify::Watcher;
+use File::ChangeNotify::Watcher::Default;
 use File::Spec;
 
 use Test::More;
@@ -10,7 +10,7 @@ use Test::More;
 my $root = File::Spec->catfile( $FindBin::Bin, '..' );
 sub f { File::Spec->catfile( $root, @_ ) }
 
-my $watcher = File::ChangeNotify::Watcher->new(
+my $watcher = File::ChangeNotify::Watcher::Default->new(
     directories => f(),
     exclude     => [
         f('foo'),

@@ -13,15 +13,14 @@ use File::ChangeNotify;
 my $watcher1 = File::ChangeNotify->instantiate_watcher( directories => 't' );
 my $watcher2 = File::ChangeNotify->instantiate_watcher( directories => 't' );
 
-isa_ok(
-    $watcher1,
-    'File::ChangeNotify::Watcher',
-    'first watcher'
+ok(
+    $watcher1->does('File::ChangeNotify::Watcher'),
+    'first watcher does the File::ChangeNotify::Watcher role'
 );
-isa_ok(
-    $watcher2,
-    'File::ChangeNotify::Watcher',
-    'second watcher'
+
+ok(
+    $watcher2->does('File::ChangeNotify::Watcher'),
+    'second watcher does the File::ChangeNotify::Watcher role'
 );
 
 done_testing();

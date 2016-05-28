@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+- Made File::ChangeNotify::Watcher a role instead of a parent class.
+
 - Fixed a bug where the wrong watcher class could be used the second time
   File::ChangeNotify->instantiate_watcher was called.
 

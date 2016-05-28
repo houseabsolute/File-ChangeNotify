@@ -11,8 +11,6 @@ use Moose;
 use File::Find ();
 use IO::KQueue;
 
-extends 'File::ChangeNotify::Watcher';
-
 has absorb_delay => (
     is      => 'ro',
     isa     => 'Int',
@@ -35,6 +33,8 @@ has _files => (
     default  => sub { {} },
     init_arg => undef,
 );
+
+with 'File::ChangeNotify::Watcher';
 
 sub sees_all_events {0}
 
