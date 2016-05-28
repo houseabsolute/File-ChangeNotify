@@ -3,6 +3,9 @@
 - Fixed a bug where the wrong watcher class could be used the second time
   File::ChangeNotify->instantiate_watcher was called.
 
+- Allow the exclude parameter to accept subroutine references. Patch by
+  H. Merijn Brand. RT #114492.
+
 
 0.24   2013-11-28
 

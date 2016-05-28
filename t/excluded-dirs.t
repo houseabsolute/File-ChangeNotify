@@ -18,6 +18,7 @@ my $watcher = File::ChangeNotify::Watcher->new(
         f( 'excluded', 'dir' ),
         qr{(?:\\|/)r[^\\/]+$},
         qr{(?:\\|/)\.[^\\/]*$},
+        sub { 0; },
     ]
 );
 

@@ -60,11 +60,11 @@ has sleep_interval => (
     default => 2,
 );
 
-my $files_or_regexps_t = subtype as 'ArrayRef[Str|RegexpRef]';
+my $files_or_regexps_or_code_t = subtype as 'ArrayRef[Str|RegexpRef|CodeRef]';
 
 has exclude => (
     is      => 'ro',
-    isa     => $files_or_regexps_t,
+    isa     => $files_or_regexps_or_code_t,
     default => sub { [] },
 );
 
@@ -86,9 +86,14 @@ sub _path_is_excluded {
     my $path = shift;
 
     foreach my $excluded ( @{ $self->exclude } ) {
-
-        if ( ref $excluded && ref $excluded eq 'Regexp' ) {
-            return 1 if $path =~ /$excluded/;
+        if ( my $ref = ref $excluded ) {
+            if ( $ref eq 'Regexp' ) {
+                return 1 if $path =~ /$excluded/;
+            }
+            elsif ( $ref eq 'CODE' ) {
+                local $_ = $path;
+                return 1 if $excluded->($path);
+            }
         }
         else {
             return 1 if $path eq $excluded;
@@ -121,7 +126,8 @@ __END__
         File::ChangeNotify->instantiate_watcher
             ( directories => [ '/my/path', '/my/other' ],
               filter      => qr/\.(?:pm|conf|yml)$/,
-              exclude     => ['t', 'root', qr(/(?!\.)[^/]+$)],
+              exclude     => ['t', 'root', qr(/(?!\.)[^/]+$),
+		              sub { -e && ! -r }],
             );
 
     if ( my @events = $watcher->new_events() ) { ... }
@@ -173,9 +179,13 @@ By default, all files are included.
 
 =item * exclude => [...]
 
-An optional list of paths to exclude. This list can contain either plain
-strings or regular expressions. If you provide a string it should contain the
-complete path to be excluded.
+An optional list of paths to exclude. This list can contain plain strings,
+regular expressions, or subroutine references. If you provide a string it
+should contain the complete path to be excluded.
+
+If you provide a sub, it should return a true value for paths to be excluded
+e.g. C<< exclude => [ sub { -e && ! -r } ], >>. The path will be passed as the
+first argument to the subroutine as well as in a localized C<$_>.
 
 The paths can be either directories or specific files. If the exclusion
 matches a directory, all of its files and subdirectories are ignored.
