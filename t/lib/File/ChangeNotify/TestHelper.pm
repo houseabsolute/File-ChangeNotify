@@ -3,6 +3,7 @@ package File::ChangeNotify::TestHelper;
 use strict;
 use warnings;
 
+use Data::Dumper;
 use File::ChangeNotify;
 use File::Temp qw( tempdir );
 use File::Path qw( mkpath rmtree );
@@ -12,9 +13,13 @@ use Test::More;
 
 use base 'Exporter';
 
+## no critic (Modules::ProhibitAutomaticExportation)
 our @EXPORT = qw( run_tests );
+## use critic
 
 our $_DESC;
+
+## no critic (ValuesAndExpressions::ProhibitLeadingZeros)
 
 sub run_tests {
     my @classes = 'File::ChangeNotify::Watcher::Default';
@@ -28,7 +33,7 @@ sub run_tests {
 
         local $_DESC = "[with $short - nonblocking]";
         _shared_tests( $class, \&_nonblocking );
-        _exclude_tests($class, \&_nonblocking);
+        _exclude_tests( $class, \&_nonblocking );
         _symlink_tests($class);
     }
 
@@ -350,7 +355,11 @@ sub _symlink_tests {
 SKIP:
     {
         skip 'This platform does not support symlinks.', 3
-            unless eval { symlink $dir2 => $symlink };
+            unless eval {
+            ## no critic (InputOutput::RequireCheckedSyscalls)
+            symlink $dir2 => $symlink;
+            1;
+            };
 
         my $watcher = $class->new(
             directories     => $dir1,
@@ -393,9 +402,9 @@ SKIP:
 
         my $dir3 = tempdir( CLEANUP => 1 );
 
-        symlink "$dir3/.",              "$dir3/self";
-        symlink "$dir3/input-circular1", "$dir3/input-circular2";
-        symlink "$dir3/input-circular2", "$dir3/input-circular1";
+        symlink "$dir3/.",               "$dir3/self"            or die $!;
+        symlink "$dir3/input-circular1", "$dir3/input-circular2" or die $!;
+        symlink "$dir3/input-circular2", "$dir3/input-circular1" or die $!;
 
         lives_ok {
             File::ChangeNotify->instantiate_watcher(
@@ -420,7 +429,7 @@ sub _check_events {
     is(
         scalar @{$got_events}, $count,
         "got $count $noun $_DESC"
-    ) or do { use Data::Dumper; diag Dumper $got_events };
+    ) or diag( Dumper $got_events);
 
     return unless $count;
 

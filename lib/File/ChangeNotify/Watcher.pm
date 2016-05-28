@@ -19,25 +19,25 @@ has filter => (
 );
 
 #<<<
-my $dir = subtype as 'Str',
+my $dir_t = subtype as 'Str',
     where { -d $_ },
     message { "$_ is not a valid directory" };
 
-my $array_of_dirs = subtype as 'ArrayRef[Str]',
+my $array_of_dirs_t = subtype as 'ArrayRef[Str]',
     where {
         map {-d} @{$_};
     },
     message {"@{$_} is not a list of valid directories"};
 
-coerce $array_of_dirs,
-    from $dir,
+coerce $array_of_dirs_t,
+    from $dir_t,
     via { [$_] };
 #>>>
 
 has directories => (
     is       => 'ro',
     writer   => '_set_directories',
-    isa      => $array_of_dirs,
+    isa      => $array_of_dirs_t,
     required => 1,
     coerce   => 1,
 );
@@ -60,11 +60,11 @@ has sleep_interval => (
     default => 2,
 );
 
-my $files_or_regexps = subtype as 'ArrayRef[Str|RegexpRef]';
+my $files_or_regexps_t = subtype as 'ArrayRef[Str|RegexpRef]';
 
 has exclude => (
     is      => 'ro',
-    isa     => $files_or_regexps,
+    isa     => $files_or_regexps_t,
     default => sub { [] },
 );
 
@@ -80,6 +80,7 @@ sub new_events {
     return $self->_interesting_events();
 }
 
+## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
 sub _path_is_excluded {
     my $self = shift;
     my $path = shift;
@@ -104,6 +105,7 @@ sub _remove_directory {
     $self->_set_directories(
         [ grep { $_ ne $dir } @{ $self->directories() } ] );
 }
+## use critic
 
 __PACKAGE__->meta()->make_immutable();
 

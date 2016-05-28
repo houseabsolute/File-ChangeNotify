@@ -13,6 +13,7 @@ use Time::HiRes qw( sleep );
 # Trying to import this just blows up on Win32, and checking
 # Time::HiRes::d_hires_stat() _also_ blows up on Win32.
 BEGIN {
+    ## no critic (ErrorHandling::RequireCheckingReturnValueOfEval)
     eval { Time::HiRes->import('stat') };
 }
 

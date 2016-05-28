@@ -5,6 +5,7 @@ use Test::More;
 
 use File::ChangeNotify;
 
+## no critic (Subroutines::ProtectPrivateSubs)
 ok(
     File::ChangeNotify::_try_load('File::ChangeNotify::Watcher::Default'),
     'can load Default watcher'

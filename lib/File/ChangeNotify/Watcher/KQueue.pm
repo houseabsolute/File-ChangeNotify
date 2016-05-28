@@ -69,7 +69,7 @@ sub _get_events {
 
     my @events;
     foreach my $kevent (@kevents) {
-        my $path  = $kevent->[KQ_UDATA];
+        my $path = $kevent->[KQ_UDATA];
         next if $self->_path_is_excluded($path);
 
         my $flags = $kevent->[KQ_FFLAGS];
@@ -181,6 +181,8 @@ sub _find {
 
 sub _watch_file {
     my ( $self, $file ) = @_;
+
+    ## no critic (InputOutput::RequireBriefOpen)
 
     # Don't panic if we can't open a file
     open my $fh, '<', $file or warn "Can't open '$file': $!";

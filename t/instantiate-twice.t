@@ -1,13 +1,14 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::Requires {
+    'Test::Without::Module' => 0,
+};
 
-eval 'use Test::Without::Module qw( Linux::Inotify2 )';
-plan skip_all => 'This test requires Test::Without::Module' if $@;
+use Test::More;
+use Test::Without::Module qw( Linux::Inotify2 );
 
 use File::ChangeNotify;
-
 
 my $watcher1 = File::ChangeNotify->instantiate_watcher( directories => 't' );
 my $watcher2 = File::ChangeNotify->instantiate_watcher( directories => 't' );
