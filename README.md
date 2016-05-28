@@ -49,33 +49,7 @@ is a better option.
 Returns a list of all the loadable [File::ChangeNotify::Watcher](https://metacpan.org/pod/File::ChangeNotify::Watcher) subclasses
 except for [File::ChangeNotify::Watcher::Default](https://metacpan.org/pod/File::ChangeNotify::Watcher::Default), which is always usable.
 
-# DONATIONS
-
-If you'd like to thank me for the work I've done on this module,
-please consider making a "donation" to me via PayPal. I spend a lot of
-free time creating free software, and would appreciate any support
-you'd care to offer.
-
-Please note that **I am not suggesting that you must do this** in order
-for me to continue working on this particular software. I will
-continue to do so, inasmuch as I have in the past, for as long as it
-interests me.
-
-Similarly, a donation made in this way will probably not make me work
-on this software much more, unless I get so many donations that I can
-consider working on free software full time, which seems unlikely at
-best.
-
-To donate, log into PayPal and send money to autarch@urth.org or use
-the button on this page:
-[http://www.urth.org/~autarch/fs-donation.html](http://www.urth.org/~autarch/fs-donation.html)
-
-# BUGS
-
-Please report any bugs or feature requests to
-`bug-file-changenotify@rt.cpan.org`, or through the web interface at
-[http://rt.cpan.org](http://rt.cpan.org).  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+# SUPPORT
 
 Bugs may be submitted through [the RT bug tracker](http://rt.cpan.org/Public/Dist/Display.html?Name=File-ChangeNotify)
 (or [bug-file-changenotify@rt.cpan.org](mailto:bug-file-changenotify@rt.cpan.org)).
@@ -103,9 +77,10 @@ button at [http://www.urth.org/~autarch/fs-donation.html](http://www.urth.org/~a
 
 Dave Rolsky <autarch@urth.org>
 
-# CONTRIBUTOR
+# CONTRIBUTORS
 
-Karen Etheridge <ether@cpan.org>
+- H. Merijn Branch <h.m.brand@xs4all.nl>
+- Karen Etheridge <ether@cpan.org>
 
 # COPYRIGHT AND LICENCE
 

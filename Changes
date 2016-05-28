@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.25   2016-05-28
+
 - Switched from Moose to Moo and Type::Tiny.
 
 - Switched from Class::Load to Module::Runtime.

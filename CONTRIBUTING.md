@@ -100,6 +100,11 @@ can submit an issue report [via the web](http://rt.cpan.org/Public/Dist/Display.
 or [via email](bug-file-changenotify@rt.cpan.org.
 This is a good place to send your questions about the usage of this distribution.
 
+## Travis
+
+All pull requests for this distribution will be automatically tested by
+[Travis](https://travis-ci.org/) and the build status will be reported on the
+pull request page. If your build fails, please take a look at the output.
 
 ## Tidyall
 
