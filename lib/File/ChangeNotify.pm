@@ -6,7 +6,7 @@ use warnings;
 our $VERSION = '0.25';
 
 use Carp qw( confess );
-use Class::Load qw( try_load_class );
+use Module::Runtime qw( use_module );
 
 # We load this up front to make sure that the prereq modules are installed.
 use File::ChangeNotify::Watcher::Default;
@@ -24,22 +24,27 @@ sub instantiate_watcher {
 {
     my $finder = Module::Pluggable::Object->new(
         search_path => 'File::ChangeNotify::Watcher' );
+    my $loaded         = 0;
     my @usable_classes = ();
 
     sub usable_classes {
         my $class = shift;
 
-        return @usable_classes if @usable_classes;
-        return @usable_classes = grep { _try_load($_) }
+        return @usable_classes if $loaded;
+        @usable_classes = grep { _try_load($_) }
             sort grep { $_ ne 'File::ChangeNotify::Watcher::Default' }
             $finder->plugins();
+        $loaded = 1;
+
+        return @usable_classes;
     }
 }
 
 sub _try_load {
     my $class = shift;
 
-    my ( $ok, $e ) = try_load_class($class);
+    my $ok = eval { use_module($class) };
+    my $e = $@;
     return $class if $ok;
 
     die $e

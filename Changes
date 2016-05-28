@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- Fixed a bug where the wrong watcher class could be used the second time
+  File::ChangeNotify->instantiate_watcher was called.
+
+
 0.24   2013-11-28
 
 - Removed used of deprecated Class::MOP::load_class().
