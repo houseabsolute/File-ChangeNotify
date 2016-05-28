@@ -28,8 +28,6 @@ sub instantiate_watcher {
     my @usable_classes = ();
 
     sub usable_classes {
-        my $class = shift;
-
         return @usable_classes if $loaded;
         @usable_classes = grep { _try_load($_) }
             sort grep { $_ ne 'File::ChangeNotify::Watcher::Default' }
@@ -41,11 +39,11 @@ sub instantiate_watcher {
 }
 
 sub _try_load {
-    my $class = shift;
+    my $module = shift;
 
-    my $ok = eval { use_module($class) };
+    my $ok = eval { use_module($module) };
     my $e = $@;
-    return $class if $ok;
+    return $module if $ok;
 
     die $e
         if $e
