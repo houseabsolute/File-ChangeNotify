@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+- Switched from Moose to Moo and Type::Tiny.
+
 - Made File::ChangeNotify::Watcher a role instead of a parent class.
 
 - Fixed a bug where the wrong watcher class could be used the second time

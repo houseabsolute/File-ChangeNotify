@@ -8,23 +8,23 @@ our $VERSION = '0.25';
 
 use Class::Load qw( load_class );
 use File::ChangeNotify::Event;
-use Moose::Util::TypeConstraints;
-use MooseX::Params::Validate qw( pos_validated_list );
+use Types::Standard qw( ArrayRef Bool ClassName CodeRef Num RegexpRef Str );
+use Type::Utils -all;
 
-use Moose::Role;
+use Moo::Role;
 
 has filter => (
     is      => 'ro',
-    isa     => 'RegexpRef',
+    isa     => RegexpRef,
     default => sub {qr/.*/},
 );
 
 #<<<
-my $dir_t = subtype as 'Str',
+my $dir_t = subtype as Str,
     where { -d $_ },
     message { "$_ is not a valid directory" };
 
-my $array_of_dirs_t = subtype as 'ArrayRef[Str]',
+my $array_of_dirs_t = subtype as ArrayRef[Str],
     where {
         map {-d} @{$_};
     },
@@ -45,23 +45,24 @@ has directories => (
 
 has follow_symlinks => (
     is      => 'ro',
-    isa     => 'Bool',
+    isa     => Bool,
     default => 0,
 );
 
 has event_class => (
     is      => 'ro',
-    isa     => 'ClassName',
+    isa     => ClassName,
     default => 'File::ChangeNotify::Event',
 );
 
 has sleep_interval => (
     is      => 'ro',
-    isa     => 'Num',
+    isa     => Num,
     default => 2,
 );
 
-my $files_or_regexps_or_code_t = subtype as 'ArrayRef[Str|RegexpRef|CodeRef]';
+my $files_or_regexps_or_code_t
+    = subtype as ArrayRef [ Str | RegexpRef | CodeRef ];
 
 has exclude => (
     is      => 'ro',

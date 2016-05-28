@@ -6,20 +6,22 @@ use namespace::autoclean;
 
 our $VERSION = '0.25';
 
-use Moose;
-
 use File::Find ();
 use IO::KQueue;
+use Types::Standard qw( HashRef Int );
+use Type::Utils qw( class_type );
+
+use Moo;
 
 has absorb_delay => (
     is      => 'ro',
-    isa     => 'Int',
+    isa     => Int,
     default => 100,
 );
 
 has _kqueue => (
     is       => 'ro',
-    isa      => 'IO::KQueue',
+    isa      => class_type('IO::KQueue'),
     default  => sub { IO::KQueue->new },
     init_arg => undef,
 );
@@ -29,7 +31,7 @@ has _kqueue => (
 # of scope.
 has _files => (
     is       => 'ro',
-    isa      => 'HashRef',
+    isa      => HashRef,
     default  => sub { {} },
     init_arg => undef,
 );

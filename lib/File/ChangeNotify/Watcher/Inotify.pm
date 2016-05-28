@@ -8,18 +8,20 @@ our $VERSION = '0.25';
 
 use File::Find ();
 use Linux::Inotify2 1.2;
+use Types::Standard qw( Bool Int );
+use Type::Utils qw( class_type );
 
-use Moose;
+use Moo;
 
 has is_blocking => (
     is      => 'ro',
-    isa     => 'Bool',
+    isa     => Bool,
     default => 1,
 );
 
 has _inotify => (
     is      => 'ro',
-    isa     => 'Linux::Inotify2',
+    isa     => class_type('Linux::Inotify2'),
     default => sub {
         Linux::Inotify2->new()
             or die "Cannot construct a Linux::Inotify2 object: $!";
@@ -29,7 +31,7 @@ has _inotify => (
 
 has _mask => (
     is      => 'ro',
-    isa     => 'Int',
+    isa     => Int,
     lazy    => 1,
     builder => '_build_mask',
 );

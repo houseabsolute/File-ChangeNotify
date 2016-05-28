@@ -9,6 +9,7 @@ our $VERSION = '0.25';
 use File::Find qw( finddepth );
 use File::Spec;
 use Time::HiRes qw( sleep );
+use Types::Standard qw( HashRef );
 
 # Trying to import this just blows up on Win32, and checking
 # Time::HiRes::d_hires_stat() _also_ blows up on Win32.
@@ -17,14 +18,14 @@ BEGIN {
     eval { Time::HiRes->import('stat') };
 }
 
-use Moose;
-use MooseX::SemiAffordanceAccessor;
+use Moo;
 
 with 'File::ChangeNotify::Watcher';
 
 has _map => (
     is      => 'rw',
-    isa     => 'HashRef',
+    writer  => '_set_map',
+    isa     => HashRef,
     default => sub { {} },
 );
 

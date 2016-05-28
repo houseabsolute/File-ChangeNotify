@@ -6,12 +6,14 @@ use namespace::autoclean;
 
 our $VERSION = '0.25';
 
-use Moose;
-use Moose::Util::TypeConstraints;
+use Types::Standard qw( Str );
+use Type::Utils qw( enum );
+
+use Moo;
 
 has path => (
     is       => 'ro',
-    isa      => 'Str',
+    isa      => Str,
     required => 1,
 );
 
