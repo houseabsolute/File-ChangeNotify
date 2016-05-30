@@ -7,11 +7,14 @@ use namespace::autoclean;
 our $VERSION = '0.26';
 
 use Carp qw( confess );
-use Module::Runtime qw( use_module );
 
 # We load this up front to make sure that the prereq modules are installed.
 use File::ChangeNotify::Watcher::Default;
 use Module::Pluggable::Object;
+use Module::Runtime qw( use_module );
+
+# First version to support coerce => 1
+use Moo 1.006 ();
 
 sub instantiate_watcher {
     my $class = shift;
