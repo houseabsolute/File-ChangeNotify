@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.27   2017-01-30
+
 - Inflating File::ChangeNotify::Default::Watcher into a Moose object with
   Moose 2.2000 would cause an error or warning because of a bug in how it
   defined an attribute. This broke Catalyst::Restarter.
