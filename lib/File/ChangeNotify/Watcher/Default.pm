@@ -23,7 +23,7 @@ use Moo;
 with 'File::ChangeNotify::Watcher';
 
 has _map => (
-    is      => 'rw',
+    is      => 'ro',
     writer  => '_set_map',
     isa     => HashRef,
     default => sub { {} },
