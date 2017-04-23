@@ -148,7 +148,7 @@ vary. Implementations that hook into some sort of kernel event interface
 happening than one implemented purely in userspace code (like the Default
 class).
 
-By default, events are returned in the form L<File::ChangeNotify::Event>
+By default, events are returned in the form of L<File::ChangeNotify::Event>
 objects, but this can be overridden by providing an "event_class" attribute to
 the constructor.
 
