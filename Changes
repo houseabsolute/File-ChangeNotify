@@ -1,5 +1,10 @@
 {{$NEXT}}
 
+- Fixed handling of the IN_MOVED_TO event for the Inotify watcher. This event
+  was being entirely ignored, but we should just treat it as a file creation
+  event. Fixed by Aaron Crane. PR #2.
+
+
 0.27   2017-01-30
 
 - Inflating File::ChangeNotify::Default::Watcher into a Moose object with

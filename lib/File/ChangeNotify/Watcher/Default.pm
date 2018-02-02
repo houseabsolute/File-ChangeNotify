@@ -127,7 +127,7 @@ sub _interesting_events {
             !$old_map->{$path}{is_dir}
             && (   $old_map->{$path}{mtime} != $new_map->{$path}{mtime}
                 || $old_map->{$path}{size} != $new_map->{$path}{size} )
-            ) {
+        ) {
             push @interesting, $self->event_class()->new(
                 path => $path,
                 type => 'modify',

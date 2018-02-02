@@ -115,7 +115,8 @@ sub _build_mask {
     my $self = shift;
 
     my $mask
-        = IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF;
+        = IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF
+        | IN_MOVED_TO;
     $mask |= IN_DONT_FOLLOW unless $self->follow_symlinks();
 
     return $mask;
@@ -201,7 +202,7 @@ sub _convert_event {
     return $self->event_class()->new(
         path => $event->fullname(),
         type => (
-              $event->IN_CREATE() ? 'create'
+              $event->IN_CREATE() || $event->IN_MOVED_TO() ? 'create'
             : $event->IN_MODIFY() ? 'modify'
             : $event->IN_DELETE() ? 'delete'
             :                       'unknown'
