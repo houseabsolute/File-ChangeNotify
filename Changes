@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- The change to Module::Runtime in 0.25 wasn't complete so this distro still
+  depended on Class::Load.
+
+
 0.28   2018-02-11
 
 - Fixed handling of the IN_MOVED_TO event for the Inotify watcher. This event

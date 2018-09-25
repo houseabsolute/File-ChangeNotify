@@ -6,8 +6,8 @@ use namespace::autoclean;
 
 our $VERSION = '0.29';
 
-use Class::Load qw( load_class );
 use File::ChangeNotify::Event;
+use Module::Runtime qw( use_module );
 use Types::Standard qw( ArrayRef Bool ClassName CodeRef Num RegexpRef Str );
 use Type::Utils -all;
 
@@ -73,7 +73,7 @@ has exclude => (
 sub BUILD {
     my $self = shift;
 
-    load_class( $self->event_class() );
+    use_module( $self->event_class() );
 }
 
 sub new_events {
