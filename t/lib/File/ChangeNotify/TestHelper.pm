@@ -9,15 +9,13 @@ use File::Temp qw( tempdir );
 use File::Path qw( mkpath rmtree );
 
 use Test::Exception;
-use Test::More;
+use Test::More 0.96;
 
 use base 'Exporter';
 
 ## no critic (Modules::ProhibitAutomaticExportation)
 our @EXPORT = qw( run_tests );
 ## use critic
-
-our $_DESC;
 
 ## no critic (ValuesAndExpressions::ProhibitLeadingZeros)
 
@@ -28,13 +26,29 @@ sub run_tests {
     for my $class (@classes) {
         ( my $short = $class ) =~ s/^File::ChangeNotify::Watcher:://;
 
-        local $_DESC = "[with $short - blocking]";
-        _shared_tests( $class, \&_blocking );
+        subtest(
+            "$short class",
+            sub {
+                subtest(
+                    'blocking',
+                    sub {
+                        _shared_tests( $class, \&_blocking );
+                    },
+                );
 
-        local $_DESC = "[with $short - nonblocking]";
-        _shared_tests( $class, \&_nonblocking );
-        _exclude_tests( $class, \&_nonblocking );
-        _symlink_tests($class);
+                subtest(
+                    'nonblocking',
+                    sub {
+                        _shared_tests( $class, \&_nonblocking );
+                        subtest(
+                            'exclude feature',
+                            sub { _exclude_tests( $class, \&_nonblocking ) }
+                        );
+                        subtest( 'symlinks', sub { _symlink_tests($class) } );
+                    },
+                );
+            },
+        );
     }
 
     done_testing();
@@ -53,11 +67,12 @@ sub _nonblocking {
 }
 
 sub _shared_tests {
-    _basic_tests(@_);
-    _multi_event_tests(@_);
-    _filter_tests(@_);
-    _dir_add_remove_tests(@_);
-    _create_and_rename_tests(@_);
+    my @args = @_;
+    subtest( 'single event basic tests', sub { _basic_tests(@args) } );
+    subtest( 'multiple events',          sub { _multi_event_tests(@args) } );
+    subtest( 'filter',                   sub { _filter_tests(@args) } );
+    subtest( 'add/remove directory', sub { _dir_add_remove_tests(@args) } );
+    subtest( 'create and rename', sub { _create_and_rename_tests(@args) } );
 }
 
 sub _basic_tests {
@@ -471,7 +486,7 @@ sub _check_events {
 
     is(
         scalar @{$got_events}, $count,
-        "got $count $noun $_DESC"
+        "got $count $noun"
     ) or diag( Dumper $got_events);
 
     return unless $count;
@@ -493,7 +508,7 @@ sub _is_events {
     is_deeply(
         [ map { { path => $_->path(), type => $_->type() } } @{$got} ],
         $expected,
-        "$desc $_DESC"
+        "$desc"
     );
 }
 
