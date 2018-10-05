@@ -34,7 +34,7 @@ sub sees_all_events {0}
 sub BUILD {
     my $self = shift;
 
-    $self->_set_map( $self->_build_map() );
+    $self->_set_map( $self->_build_map );
 }
 
 sub _build_map {
@@ -55,11 +55,11 @@ sub _build_map {
                 my $entry = $self->_entry_for_map($path) or return;
                 $map{$path} = $entry;
             },
-            follow_fast => ( $self->follow_symlinks() ? 1 : 0 ),
+            follow_fast => ( $self->follow_symlinks ? 1 : 0 ),
             no_chdir    => 1,
             follow_skip => 2,
         },
-        @{ $self->directories() },
+        @{ $self->directories },
     );
 
     return \%map;
@@ -74,7 +74,7 @@ sub _entry_for_map {
     return if -l $path && !$is_dir;
 
     unless ($is_dir) {
-        my $filter = $self->filter();
+        my $filter = $self->filter;
         return unless ( File::Spec->splitpath($path) )[2] =~ /$filter/;
     }
 
@@ -97,10 +97,10 @@ sub wait_for_events {
     my $self = shift;
 
     while (1) {
-        my @events = $self->_interesting_events();
+        my @events = $self->_interesting_events;
         return @events if @events;
 
-        sleep $self->sleep_interval();
+        sleep $self->sleep_interval;
     }
 }
 
@@ -109,8 +109,8 @@ sub _interesting_events {
 
     my @interesting;
 
-    my $old_map = $self->_map();
-    my $new_map = $self->_build_map();
+    my $old_map = $self->_map;
+    my $new_map = $self->_build_map;
 
     for my $path ( sort keys %{$old_map} ) {
         if ( !exists $new_map->{$path} ) {
@@ -118,7 +118,7 @@ sub _interesting_events {
                 $self->_remove_directory($path);
             }
 
-            push @interesting, $self->event_class()->new(
+            push @interesting, $self->event_class->new(
                 path => $path,
                 type => 'delete',
             );
@@ -128,7 +128,7 @@ sub _interesting_events {
             && (   $old_map->{$path}{mtime} != $new_map->{$path}{mtime}
                 || $old_map->{$path}{size} != $new_map->{$path}{size} )
         ) {
-            push @interesting, $self->event_class()->new(
+            push @interesting, $self->event_class->new(
                 path => $path,
                 type => 'modify',
             );
@@ -137,14 +137,14 @@ sub _interesting_events {
 
     for my $path ( sort grep { !exists $old_map->{$_} } keys %{$new_map} ) {
         if ( -d $path ) {
-            push @interesting, $self->event_class()->new(
+            push @interesting, $self->event_class->new(
                 path => $path,
                 type => 'create',
                 ),
                 ;
         }
         else {
-            push @interesting, $self->event_class()->new(
+            push @interesting, $self->event_class->new(
                 path => $path,
                 type => 'create',
             );
@@ -156,7 +156,7 @@ sub _interesting_events {
     return @interesting;
 }
 
-__PACKAGE__->meta()->make_immutable();
+__PACKAGE__->meta->make_immutable;
 
 1;
 
@@ -169,7 +169,7 @@ __END__
 This class implements watching by comparing two snapshots of the filesystem
 tree. It if inefficient and dumb, and so it is the subclass of last resort.
 
-Its C<< $watcher->wait_for_events() >> method sleeps between
+Its C<< $watcher->wait_for_events >> method sleeps between
 comparisons of the filesystem snapshot it takes.
 
 =cut

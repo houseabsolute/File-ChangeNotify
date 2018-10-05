@@ -21,7 +21,7 @@ our @EXPORT = qw( run_tests );
 
 sub run_tests {
     my @classes = 'File::ChangeNotify::Watcher::Default';
-    push @classes, File::ChangeNotify->usable_classes();
+    push @classes, File::ChangeNotify->usable_classes;
 
     for my $class (@classes) {
         ( my $short = $class ) =~ s/^File::ChangeNotify::Watcher:://;
@@ -57,13 +57,13 @@ sub run_tests {
 sub _blocking {
     my $watcher = shift;
 
-    return $watcher->wait_for_events();
+    return $watcher->wait_for_events;
 }
 
 sub _nonblocking {
     my $watcher = shift;
 
-    return $watcher->new_events();
+    return $watcher->new_events;
 }
 
 sub _shared_tests {
@@ -152,7 +152,7 @@ sub _multi_event_tests {
     create_file($path2);
     modify_file($path2);
 
-    if ( $watcher->sees_all_events() ) {
+    if ( $watcher->sees_all_events ) {
         _check_events(
             5,
             [ $events_sub->($watcher) ],
@@ -291,7 +291,7 @@ sub _dir_add_remove_tests {
     my $path = "$subdir2/whatever";
     create_file($path);
 
-    if ( $watcher->sees_all_events() ) {
+    if ( $watcher->sees_all_events ) {
         _check_events(
             4,
             [ $events_sub->($watcher) ],
@@ -336,7 +336,7 @@ sub _dir_add_remove_tests {
         2,
 
         # The Default & Inotify watchers have different orders for these events
-        [ sort { $a->path() cmp $b->path() } $events_sub->($watcher) ],
+        [ sort { $a->path cmp $b->path } $events_sub->($watcher) ],
         [
             {
                 path => $subdir2,
@@ -431,7 +431,7 @@ SKIP:
 
         _check_events(
             0,
-            [ $watcher->new_events() ],
+            [ $watcher->new_events ],
             [],
             'no events for symlinked dir when not following symlinks',
         );
@@ -448,7 +448,7 @@ SKIP:
 
         _check_events(
             1,
-            [ $watcher->new_events() ],
+            [ $watcher->new_events ],
             [
                 {
                     path => $expected_path,
@@ -506,7 +506,7 @@ sub _is_events {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     is_deeply(
-        [ map { { path => $_->path(), type => $_->type() } } @{$got} ],
+        [ map { { path => $_->path, type => $_->type } } @{$got} ],
         $expected,
         "$desc"
     );

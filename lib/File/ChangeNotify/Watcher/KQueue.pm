@@ -6,7 +6,7 @@ use namespace::autoclean;
 
 our $VERSION = '0.30';
 
-use File::Find ();
+use File::Find qw( find );
 use IO::KQueue;
 use Types::Standard qw( HashRef Int );
 use Type::Utils qw( class_type );
@@ -41,12 +41,13 @@ with 'File::ChangeNotify::Watcher';
 sub sees_all_events {0}
 
 sub BUILD {
-    my ($self) = @_;
+    my $self = shift;
+
     $self->_watch_dir($_) for @{ $self->directories };
 }
 
 sub wait_for_events {
-    my ($self) = @_;
+    my $self = shift;
 
     while (1) {
         my @events = $self->_get_events;
@@ -55,12 +56,14 @@ sub wait_for_events {
 }
 
 sub new_events {
-    my ($self) = @_;
+    my $self = shift;
+
     my @events = $self->_get_events(0);
 }
 
 sub _get_events {
-    my ( $self, $timeout ) = @_;
+    my $self    = shift;
+    my $timeout = shift;
 
     my @kevents = $self->_kqueue->kevent( defined $timeout ? $timeout : () );
 
@@ -125,12 +128,16 @@ sub _get_events {
 }
 
 sub _event {
-    my ( $self, $path, $type ) = @_;
+    my $self = shift;
+    my $path = shift;
+    my $type = shift;
+
     return $self->event_class->new( path => $path, type => $type );
 }
 
 sub _watch_dir {
-    my ( $self, $dir ) = @_;
+    my $self = shift;
+    my $dir  = shift;
 
     my @new_files;
 
@@ -159,7 +166,8 @@ sub _watch_dir {
 }
 
 sub _is_included_file {
-    my ( $self, $path ) = @_;
+    my $self = shift;
+    my $path = shift;
 
     return 1 if -d $path;
 
@@ -169,8 +177,11 @@ sub _is_included_file {
 }
 
 sub _find {
-    my ( $self, $dir, $wanted ) = @_;
-    File::Find::find(
+    my $self   = shift;
+    my $dir    = shift;
+    my $wanted = shift;
+
+    find(
         {
             wanted      => $wanted,
             no_chdir    => 1,
@@ -182,7 +193,8 @@ sub _find {
 }
 
 sub _watch_file {
-    my ( $self, $file ) = @_;
+    my $self = shift;
+    my $file = shift;
 
     ## no critic (InputOutput::RequireBriefOpen)
 

@@ -23,7 +23,7 @@ has type => (
     required => 1,
 );
 
-__PACKAGE__->meta()->make_immutable();
+__PACKAGE__->meta->make_immutable;
 
 1;
 
@@ -39,8 +39,8 @@ __END__
         exclude => [ 't', 'root', qr(/(?!\.)[^/]+$) ],
     );
 
-    for my $event ( $watcher->new_events() ) {
-        print $event->path(), ' - ', $event->type(), "\n";
+    for my $event ( $watcher->new_events ) {
+        print $event->path, ' - ', $event->type, "\n";
     }
 
 =head1 DESCRIPTION
@@ -67,11 +67,11 @@ The type of event. This must be one of "create", "modify", "delete", or
 
 =back
 
-=head2 $event->path()
+=head2 $event->path
 
 Returns the path of the changed file or directory.
 
-=head2 $event->type()
+=head2 $event->type
 
 Returns the type of event.
 

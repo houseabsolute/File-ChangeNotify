@@ -73,13 +73,13 @@ has exclude => (
 sub BUILD {
     my $self = shift;
 
-    use_module( $self->event_class() );
+    use_module( $self->event_class );
 }
 
 sub new_events {
     my $self = shift;
 
-    return $self->_interesting_events();
+    return $self->_interesting_events;
 }
 
 ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
@@ -110,7 +110,7 @@ sub _remove_directory {
     my $dir  = shift;
 
     $self->_set_directories(
-        [ grep { $_ ne $dir } @{ $self->directories() } ] );
+        [ grep { $_ ne $dir } @{ $self->directories } ] );
 }
 ## use critic
 
@@ -130,10 +130,10 @@ __END__
 		              sub { -e && ! -r }],
             );
 
-    if ( my @events = $watcher->new_events() ) { ... }
+    if ( my @events = $watcher->new_events ) { ... }
 
     # blocking
-    while ( my @events = $watcher->wait_for_events() ) { ... }
+    while ( my @events = $watcher->wait_for_events ) { ... }
 
 =head1 DESCRIPTION
 
@@ -201,7 +201,7 @@ directories and files reported.
 =item * sleep_interval => $number
 
 For watchers which call C<sleep> to implement the C<<
-$watcher->wait_for_events() >> method, this argument controls how long
+$watcher->wait_for_events >> method, this argument controls how long
 it sleeps for. The value is a number in seconds.
 
 The default is 2 seconds.
@@ -213,7 +213,7 @@ default, this is L<File::ChangeNotify::Event>.
 
 =back
 
-=head2 $watcher->wait_for_events()
+=head2 $watcher->wait_for_events
 
 This method causes the watcher to block until it sees interesting
 events, and then return them as a list.
@@ -221,12 +221,12 @@ events, and then return them as a list.
 Some watcher subclasses may implement blocking as a sleep loop, while
 others may actually block.
 
-=head2 $watcher->new_events()
+=head2 $watcher->new_events
 
 This method returns a list of any interesting events seen since the
 last time the watcher checked.
 
-=head2 $watcher->sees_all_events()
+=head2 $watcher->sees_all_events
 
 If this is true, the watcher will report on all events.
 
