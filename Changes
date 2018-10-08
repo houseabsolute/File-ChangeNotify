@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.30   2018-10-08 (TRIAL RELEASE)
+
 - Added an optional feature to track path attribute changes (permissions,
   ownership) as well as to provide the old vs new attributes and/or content in
   modify events. Both of these features are off by default since they can use
