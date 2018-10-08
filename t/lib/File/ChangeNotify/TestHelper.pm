@@ -424,74 +424,72 @@ sub _symlink_tests {
     my $dir2 = tempdir( CLEANUP => 1 );
 
     my $symlink = File::Spec->catfile( $dir1, 'other' );
-SKIP:
-    {
-        skip 'This platform does not support symlinks.', 3
-            unless eval {
-            ## no critic (InputOutput::RequireCheckedSyscalls)
-            symlink $dir2 => $symlink;
-            1;
-            };
 
-        my $watcher = $class->new(
-            directories     => $dir1,
-            follow_symlinks => 0,
-            sleep_interval  => 0,
-        );
+    skip_all 'This platform does not support symlinks.'
+        unless eval {
+        ## no critic (InputOutput::RequireCheckedSyscalls)
+        symlink $dir2 => $symlink;
+        1;
+        };
 
-        my $path = File::Spec->catfile( $dir2, 'file' );
-        create_file($path);
-        delete_file($path);
+    my $watcher = $class->new(
+        directories     => $dir1,
+        follow_symlinks => 0,
+        sleep_interval  => 0,
+    );
 
-        _is_events(
-            [ $watcher->new_events ],
-            [],
-            'no events for symlinked dir when not following symlinks',
-        );
+    my $path = File::Spec->catfile( $dir2, 'file' );
+    create_file($path);
+    delete_file($path);
 
-        $watcher = $class->new(
-            directories     => $dir1,
-            follow_symlinks => 1,
-            sleep_interval  => 0,
-        );
+    _is_events(
+        [ $watcher->new_events ],
+        [],
+        'no events for symlinked dir when not following symlinks',
+    );
 
-        create_file($path);
+    $watcher = $class->new(
+        directories     => $dir1,
+        follow_symlinks => 1,
+        sleep_interval  => 0,
+    );
 
-        my $expected_path = File::Spec->catfile( $symlink, 'file' );
+    create_file($path);
 
-        _is_events(
-            [ $watcher->new_events ],
-            [
-                {
-                    path => $expected_path,
-                    type => 'create',
-                },
-            ],
-            'one event for symlinked dir when following symlinks',
-        );
+    my $expected_path = File::Spec->catfile( $symlink, 'file' );
 
-        my $dir3 = tempdir( CLEANUP => 1 );
-
-        symlink File::Spec->catdir( $dir3, '.' ),
-            File::Spec->catdir( $dir3, 'self' )
-            or die $!;
-        symlink File::Spec->catfile( $dir3, 'input-circular1' ),
-            File::Spec->catfile( $dir3, 'input-circular2' )
-            or die $!;
-        symlink File::Spec->catfile( $dir3, 'input-circular2' ),
-            File::Spec->catfile( $dir3, 'input-circular1' )
-            or die $!;
-
-        ok(
-            lives {
-                File::ChangeNotify->instantiate_watcher(
-                    directories     => $dir3,
-                    follow_symlinks => 1,
-                );
+    _is_events(
+        [ $watcher->new_events ],
+        [
+            {
+                path => $expected_path,
+                type => 'create',
             },
-            'made watcher for directory with circular symlinks'
-        );
-    }
+        ],
+        'one event for symlinked dir when following symlinks',
+    );
+
+    my $dir3 = tempdir( CLEANUP => 1 );
+
+    symlink File::Spec->catdir( $dir3, '.' ),
+        File::Spec->catdir( $dir3, 'self' )
+        or die $!;
+    symlink File::Spec->catfile( $dir3, 'input-circular1' ),
+        File::Spec->catfile( $dir3, 'input-circular2' )
+        or die $!;
+    symlink File::Spec->catfile( $dir3, 'input-circular2' ),
+        File::Spec->catfile( $dir3, 'input-circular1' )
+        or die $!;
+
+    ok(
+        lives {
+            File::ChangeNotify->instantiate_watcher(
+                directories     => $dir3,
+                follow_symlinks => 1,
+            );
+        },
+        'made watcher for directory with circular symlinks'
+    );
 }
 
 sub _modify_file_attributes_tests {
