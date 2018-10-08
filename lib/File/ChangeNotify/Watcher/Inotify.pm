@@ -50,7 +50,11 @@ sub BUILD {
     # calls ->_inotify itself.
     $self->_watch_directory($_) for @{ $self->directories };
 
-    return $self;
+    $self->_set_map( $self->_current_map )
+        if $self->modify_includes_file_attributes
+        || $self->modify_includes_content;
+
+    return;
 }
 
 sub wait_for_events {
@@ -76,14 +80,22 @@ around new_events => sub {
 sub _interesting_events {
     my $self = shift;
 
+    # This may be a blocking read, in which case it will not return until
+    # something happens. For Catalyst, the restarter will end up calling
+    # ->wait_for_events again after handling the changes.
+    my @events = $self->_inotify->read;
+
+    my ( $old_map, $new_map );
+    if (   $self->modify_includes_file_attributes
+        || $self->modify_includes_content ) {
+        $old_map = $self->_map;
+        $new_map = $self->_current_map;
+    }
+
     my $filter = $self->filter;
 
     my @interesting;
-
-    # This may be a blocking read, in which case it will not return until
-    # something happens. For Catalyst, the restarter will end up calling
-    # ->watch again after handling the changes.
-    for my $event ( $self->_inotify->read ) {
+    for my $event (@events) {
 
         # An excluded path will show up here if ...
         #
@@ -91,6 +103,7 @@ sub _interesting_events {
         # excluded or when the exclusion excludes a file, not a dir.
         next if $self->_path_is_excluded( $event->fullname );
 
+        ## no critic (ControlStructures::ProhibitCascadingIfElse)
         if ( $event->IN_CREATE && $event->IN_ISDIR ) {
             $self->_watch_directory( $event->fullname );
             push @interesting, $event;
@@ -100,6 +113,14 @@ sub _interesting_events {
         elsif ( $event->IN_DELETE_SELF ) {
             $self->_remove_directory( $event->fullname );
         }
+        elsif ( $event->IN_ATTRIB ) {
+            next
+                unless $self->_path_matches(
+                $self->modify_includes_file_attributes,
+                $event->fullname
+                );
+            push @interesting, $event;
+        }
 
         # We just want to check the _file_ name
         elsif ( $event->name =~ /$filter/ ) {
@@ -107,8 +128,14 @@ sub _interesting_events {
         }
     }
 
-    return
-        map { $_->can('path') ? $_ : $self->_convert_event($_) } @interesting;
+    $self->_set_map($new_map)
+        if $self->_has_map;
+
+    return map {
+              $_->can('path')
+            ? $_
+            : $self->_convert_event( $_, $old_map, $new_map )
+    } @interesting;
 }
 
 sub _build_mask {
@@ -118,6 +145,7 @@ sub _build_mask {
         = IN_MODIFY | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF
         | IN_MOVED_TO;
     $mask |= IN_DONT_FOLLOW unless $self->follow_symlinks;
+    $mask |= IN_ATTRIB if $self->modify_includes_file_attributes;
 
     return $mask;
 }
@@ -139,7 +167,6 @@ sub _watch_directory {
                     $File::Find::prune = 1;
                     return;
                 }
-
                 $self->_add_watch_if_dir($path);
             },
             follow_fast => ( $self->follow_symlinks ? 1 : 0 ),
@@ -196,17 +223,39 @@ sub _fake_events_for_new_dir {
 }
 
 sub _convert_event {
-    my $self  = shift;
-    my $event = shift;
+    my $self    = shift;
+    my $event   = shift;
+    my $old_map = shift;
+    my $new_map = shift;
+
+    my $path = $event->fullname;
+    my $type
+        = $event->IN_CREATE || $event->IN_MOVED_TO ? 'create'
+        : $event->IN_MODIFY || $event->IN_ATTRIB   ? 'modify'
+        : $event->IN_DELETE ? 'delete'
+        :                     'unknown';
+
+    my @extra;
+    if (
+        $type eq 'modify'
+        && (   $self->modify_includes_file_attributes
+            || $self->modify_includes_content )
+    ) {
+
+        @extra = (
+            $self->_modify_event_maybe_file_attribute_changes(
+                $path, $old_map, $new_map
+            ),
+            $self->_modify_event_maybe_content_changes(
+                $path, $old_map, $new_map
+            ),
+        );
+    }
 
     return $self->event_class->new(
-        path => $event->fullname,
-        type => (
-              $event->IN_CREATE || $event->IN_MOVED_TO ? 'create'
-            : $event->IN_MODIFY ? 'modify'
-            : $event->IN_DELETE ? 'delete'
-            :                       'unknown'
-        ),
+        path => $path,
+        type => $type,
+        @extra,
     );
 }
 

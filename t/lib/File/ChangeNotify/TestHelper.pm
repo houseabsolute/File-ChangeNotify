@@ -3,13 +3,21 @@ package File::ChangeNotify::TestHelper;
 use strict;
 use warnings;
 
-use Data::Dumper;
 use File::ChangeNotify;
-use File::Temp qw( tempdir );
 use File::Path qw( mkpath rmtree );
+use File::Spec;
+use File::Temp qw( tempdir );
+use Module::Runtime qw( use_module );
 
-use Test::Exception;
-use Test::More 0.96;
+BEGIN {
+    ## no critic (ErrorHandling::RequireCheckingReturnValueOfEval)
+    eval {
+        require Time::HiRes;
+        Time::HiRes->import('stat');
+    };
+}
+
+use Test2::V0;
 
 use base 'Exporter';
 
@@ -20,11 +28,21 @@ our @EXPORT = qw( run_tests );
 ## no critic (ValuesAndExpressions::ProhibitLeadingZeros)
 
 sub run_tests {
-    my @classes = 'File::ChangeNotify::Watcher::Default';
-    push @classes, File::ChangeNotify->usable_classes;
+    my @classes;
+    if ( $ENV{FCN_CLASS} ) {
+        @classes = $ENV{FCN_CLASS};
+    }
+    else {
+        @classes = 'File::ChangeNotify::Watcher::Default';
+        push @classes, File::ChangeNotify->usable_classes;
+    }
 
     for my $class (@classes) {
         ( my $short = $class ) =~ s/^File::ChangeNotify::Watcher:://;
+
+        # $class may just be something like "Default" if it came from an env var.
+        my $long = 'File::ChangeNotify::Watcher::' . $short;
+        use_module($long);
 
         subtest(
             "$short class",
@@ -32,19 +50,19 @@ sub run_tests {
                 subtest(
                     'blocking',
                     sub {
-                        _shared_tests( $class, \&_blocking );
+                        _shared_tests( $long, \&_blocking );
                     },
                 );
 
                 subtest(
                     'nonblocking',
                     sub {
-                        _shared_tests( $class, \&_nonblocking );
+                        _shared_tests( $long, \&_nonblocking );
                         subtest(
                             'exclude feature',
-                            sub { _exclude_tests( $class, \&_nonblocking ) }
+                            sub { _exclude_tests( $long, \&_nonblocking ) }
                         );
-                        subtest( 'symlinks', sub { _symlink_tests($class) } );
+                        subtest( 'symlinks', sub { _symlink_tests($long) } );
                     },
                 );
             },
@@ -73,6 +91,14 @@ sub _shared_tests {
     subtest( 'filter',                   sub { _filter_tests(@args) } );
     subtest( 'add/remove directory', sub { _dir_add_remove_tests(@args) } );
     subtest( 'create and rename', sub { _create_and_rename_tests(@args) } );
+    subtest(
+        'modify includes stat info',
+        sub { _modify_file_attributes_tests(@args) }
+    );
+    subtest(
+        'modify includes content',
+        sub { _modify_content_tests(@args) }
+    );
 }
 
 sub _basic_tests {
@@ -87,11 +113,10 @@ sub _basic_tests {
         sleep_interval  => 0,
     );
 
-    my $path = "$dir/whatever";
+    my $path = File::Spec->catfile( $dir, 'whatever' );
     create_file($path);
 
-    _check_events(
-        1,
+    _is_events(
         [ $events_sub->($watcher) ],
         [
             {
@@ -104,8 +129,7 @@ sub _basic_tests {
 
     modify_file($path);
 
-    _check_events(
-        1,
+    _is_events(
         [ $events_sub->($watcher) ],
         [
             {
@@ -118,8 +142,7 @@ sub _basic_tests {
 
     delete_file($path);
 
-    _check_events(
-        1,
+    _is_events(
         [ $events_sub->($watcher) ],
         [
             {
@@ -143,18 +166,17 @@ sub _multi_event_tests {
         sleep_interval  => 0,
     );
 
-    my $path1 = "$dir/whatever";
+    my $path1 = File::Spec->catfile( $dir, 'whatever' );
     create_file($path1);
     modify_file($path1);
     delete_file($path1);
 
-    my $path2 = "$dir/another";
+    my $path2 = File::Spec->catfile( $dir, 'another' );
     create_file($path2);
     modify_file($path2);
 
     if ( $watcher->sees_all_events ) {
-        _check_events(
-            5,
+        _is_events(
             [ $events_sub->($watcher) ],
             [
                 {
@@ -178,8 +200,7 @@ sub _multi_event_tests {
         );
     }
     else {
-        _check_events(
-            1,
+        _is_events(
             [ $events_sub->($watcher) ],
             [
                 {
@@ -205,8 +226,8 @@ sub _create_and_rename_tests {
         sleep_interval  => 0,
     );
 
-    my $path      = "$dir/file.txt";
-    my $temp_path = "$dir/file.txt-tmp";
+    my $path      = File::Spec->catfile( $dir, 'file.txt' );
+    my $temp_path = File::Spec->catfile( $dir, 'file.txt-tmp' );
 
     create_file($temp_path);
     rename $temp_path, $path
@@ -221,7 +242,6 @@ sub _create_and_rename_tests {
     # would work, but the test would then hang under a version of Inotify that
     # isn't patched to treat IN_MOVED_TO as a 'create' event (because no events
     # would ever match). So ignore events that aren't for the final file.
-
     _is_events(
         [ grep { $_->path eq $path } @events ],
         [
@@ -231,7 +251,7 @@ sub _create_and_rename_tests {
             },
         ],
         'single creation event on final file for create/rename',
-    ) or diag( Dumper( \@events ) );
+    );
 }
 
 sub _filter_tests {
@@ -247,16 +267,15 @@ sub _filter_tests {
         sleep_interval  => 0,
     );
 
-    my $path1 = "$dir/not-included";
+    my $path1 = File::Spec->catfile( $dir, 'not-included' );
     create_file($path1);
     modify_file($path1);
     delete_file($path1);
 
-    my $path2 = "$dir/foo.txt";
+    my $path2 = File::Spec->catfile( $dir, 'foo.txt' );
     create_file($path2);
 
-    _check_events(
-        1,
+    _is_events(
         [ $events_sub->($watcher) ],
         [
             {
@@ -280,20 +299,19 @@ sub _dir_add_remove_tests {
         sleep_interval  => 0,
     );
 
-    my $subdir1 = "$dir/subdir1";
-    my $subdir2 = "$dir/subdir2";
+    my $subdir1 = File::Spec->catdir( $dir, 'subdir1' );
+    my $subdir2 = File::Spec->catdir( $dir, 'subdir2' );
 
     mkpath( $subdir1, 0, 0755 );
     rmtree($subdir1);
 
     mkpath( $subdir2, 0, 0755 );
 
-    my $path = "$subdir2/whatever";
+    my $path = File::Spec->catfile( $subdir2, 'whatever' );
     create_file($path);
 
     if ( $watcher->sees_all_events ) {
-        _check_events(
-            4,
+        _is_events(
             [ $events_sub->($watcher) ],
             [
                 {
@@ -314,8 +332,7 @@ sub _dir_add_remove_tests {
         );
     }
     else {
-        _check_events(
-            2,
+        _is_events(
             [ $events_sub->($watcher) ],
             [
                 {
@@ -332,8 +349,7 @@ sub _dir_add_remove_tests {
 
     rmtree($subdir2);
 
-    _check_events(
-        2,
+    _is_events(
 
         # The Default & Inotify watchers have different orders for these events
         [ sort { $a->path cmp $b->path } $events_sub->($watcher) ],
@@ -366,11 +382,10 @@ sub _exclude_tests {
         ],
     );
 
-    my $included = "$dir/include";
+    my $included = File::Spec->catfile( $dir, 'include' );
     create_file($included);
 
-    _check_events(
-        1,
+    _is_events(
         [ $events_sub->($watcher) ],
         [
             {
@@ -381,22 +396,21 @@ sub _exclude_tests {
         "added/modified/deleted $included",
     );
 
-    mkpath( "$dir/ignored-dir", 0, 0755 );
-    my $excluded_dir = "$dir/ignored-dir/foo";
-    create_file($excluded_dir);
+    my $ignored_dir = File::Spec->catdir( $dir, 'ignored-dir' );
+    mkpath( $ignored_dir, 0, 0755 );
+    my $excluded = File::Spec->catfile( $ignored_dir, 'foo' );
+    create_file($excluded);
 
-    _check_events(
-        0,
+    _is_events(
         [ $events_sub->($watcher) ],
         [],
-        "created $excluded_dir - should be ignored",
+        "created $excluded - should be ignored",
     );
 
-    my $excluded_file = "$dir/foo.ignore";
+    my $excluded_file = File::Spec->catfile( $dir, 'foo.ignore' );
     create_file($excluded_file);
 
-    _check_events(
-        0,
+    _is_events(
         [ $events_sub->($watcher) ],
         [],
         "created $excluded_file - should be ignored",
@@ -409,7 +423,7 @@ sub _symlink_tests {
     my $dir1 = tempdir( CLEANUP => 1 );
     my $dir2 = tempdir( CLEANUP => 1 );
 
-    my $symlink = "$dir1/other";
+    my $symlink = File::Spec->catfile( $dir1, 'other' );
 SKIP:
     {
         skip 'This platform does not support symlinks.', 3
@@ -425,12 +439,11 @@ SKIP:
             sleep_interval  => 0,
         );
 
-        my $path = "$dir2/file";
+        my $path = File::Spec->catfile( $dir2, 'file' );
         create_file($path);
         delete_file($path);
 
-        _check_events(
-            0,
+        _is_events(
             [ $watcher->new_events ],
             [],
             'no events for symlinked dir when not following symlinks',
@@ -444,10 +457,9 @@ SKIP:
 
         create_file($path);
 
-        my $expected_path = "$symlink/file";
+        my $expected_path = File::Spec->catfile( $symlink, 'file' );
 
-        _check_events(
-            1,
+        _is_events(
             [ $watcher->new_events ],
             [
                 {
@@ -460,41 +472,245 @@ SKIP:
 
         my $dir3 = tempdir( CLEANUP => 1 );
 
-        symlink "$dir3/.",               "$dir3/self"            or die $!;
-        symlink "$dir3/input-circular1", "$dir3/input-circular2" or die $!;
-        symlink "$dir3/input-circular2", "$dir3/input-circular1" or die $!;
+        symlink File::Spec->catdir( $dir3, '.' ),
+            File::Spec->catdir( $dir3, 'self' )
+            or die $!;
+        symlink File::Spec->catfile( $dir3, 'input-circular1' ),
+            File::Spec->catfile( $dir3, 'input-circular2' )
+            or die $!;
+        symlink File::Spec->catfile( $dir3, 'input-circular2' ),
+            File::Spec->catfile( $dir3, 'input-circular1' )
+            or die $!;
 
-        lives_ok {
-            File::ChangeNotify->instantiate_watcher(
-                directories     => $dir3,
-                follow_symlinks => 1,
-            );
-        }
-        'made watcher for directory with circular symlinks';
+        ok(
+            lives {
+                File::ChangeNotify->instantiate_watcher(
+                    directories     => $dir3,
+                    follow_symlinks => 1,
+                );
+            },
+            'made watcher for directory with circular symlinks'
+        );
     }
 }
 
-sub _check_events {
-    my $count         = shift;
-    my $got_events    = shift;
-    my $expect_events = shift;
-    my $desc          = shift;
+sub _modify_file_attributes_tests {
+    my @args = @_;
 
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    # These tests hang on Windows because Windows doesn't support chmod, so we
+    # block waiting for an event in the blocking tests.
+    skip_all('chmod does not work on Windows') if $^O eq 'MSWin32';
 
-    my $noun = $count == 1 ? 'event' : 'events';
+    subtest(
+        'everything includes file_attributes',
+        sub { _modify_file_attributes_on_everything_tests(@args) }
+    );
+    subtest(
+        'some things includes file_attributes',
+        sub { _modify_file_attributes_on_some_things_tests(@args) }
+    );
+}
 
-    is(
-        scalar @{$got_events}, $count,
-        "got $count $noun"
-    ) or diag( Dumper $got_events);
+sub _modify_file_attributes_on_everything_tests {
+    my $class      = shift;
+    my $events_sub = shift;
 
-    return unless $count;
+    my $dir = tempdir( CLEANUP => 1 );
+
+    my $chmod_path = File::Spec->catfile( $dir, 'will-chmod' );
+    create_file($chmod_path);
+    chmod 0666, $chmod_path or die "Cannot chmod $chmod_path: $!";
+
+    # We will also modify a file to make sure that we _don't_ include file
+    # attributes in that modify event.
+    my $content_path = File::Spec->catfile( $dir, 'will-modify-content' );
+    create_file($content_path);
+
+    my $watcher = $class->new(
+        directories                     => $dir,
+        follow_symlinks                 => 0,
+        sleep_interval                  => 0,
+        modify_includes_file_attributes => 1,
+    );
+
+    chmod 0600, $chmod_path or die "Cannot chmod $chmod_path: $!";
+    modify_file($content_path);
+
+    my @stat = stat $chmod_path;
 
     _is_events(
-        $got_events,
-        $expect_events,
-        $desc,
+        [ sort { $a->path cmp $b->path } $events_sub->($watcher) ],
+        [
+            {
+                path       => $chmod_path,
+                type       => 'modify',
+                attributes => [
+                    {
+                        permissions => 0666,
+                        uid         => $stat[4],
+                        gid         => $stat[5],
+                    },
+                    {
+                        permissions => 0600,
+                        uid         => $stat[4],
+                        gid         => $stat[5],
+                    },
+                ],
+            },
+            {
+                path => $content_path,
+                type => 'modify',
+            },
+        ],
+        'got stat info in modify event for file that had permissions change',
+    );
+}
+
+sub _modify_file_attributes_on_some_things_tests {
+    my $class      = shift;
+    my $events_sub = shift;
+
+    my $parent = tempdir( CLEANUP => 1 );
+    my $subdir1 = File::Spec->catdir( $parent, 'subdir1' );
+    my $subdir2 = File::Spec->catdir( $parent, 'subdir2' );
+
+    for my $d ( $subdir1, $subdir2 ) {
+        mkpath( $d, 0, 0755 ) or die "Cannot mkpath $d: $!";
+    }
+
+    my $path1 = File::Spec->catfile( $subdir1, 'will-chmod' );
+    my $path2 = File::Spec->catfile( $subdir2, 'will-chmod' );
+
+    for my $p ( $path1, $path2 ) {
+        create_file($p);
+        chmod 0666, $p or die "Cannot chmod $p: $!";
+    }
+
+    my $watcher = $class->new(
+        directories                     => $parent,
+        follow_symlinks                 => 0,
+        sleep_interval                  => 0,
+        modify_includes_file_attributes => [qr/^\Q$subdir1/],
+    );
+
+    for my $p ( $path1, $path2 ) {
+        chmod 0600, $p or die "Cannot chmod $p: $!";
+    }
+
+    my @stat = stat $path1;
+
+    _is_events(
+        [ $events_sub->($watcher) ],
+        [
+            {
+                path       => $path1,
+                type       => 'modify',
+                attributes => [
+                    {
+                        permissions => 0666,
+                        uid         => $stat[4],
+                        gid         => $stat[5],
+                    },
+                    {
+                        permissions => 0600,
+                        uid         => $stat[4],
+                        gid         => $stat[5],
+                    },
+                ],
+            },
+        ],
+        'got stat info in modify event for path where modify includes file_attributes',
+    );
+}
+
+sub _modify_content_tests {
+    my @args = @_;
+
+    subtest(
+        'everything includes content',
+        sub { _modify_content_on_everything_tests(@args) }
+    );
+    subtest(
+        'some things includes content',
+        sub { _modify_content_on_some_things_tests(@args) }
+    );
+}
+
+sub _modify_content_on_everything_tests {
+    my $class      = shift;
+    my $events_sub = shift;
+
+    my $dir = tempdir( CLEANUP => 1 );
+
+    my $path = File::Spec->catfile( $dir, 'will-modify-content' );
+    create_file( $path, "first\n" );
+
+    my $watcher = $class->new(
+        directories             => $dir,
+        follow_symlinks         => 0,
+        sleep_interval          => 0,
+        modify_includes_content => 1,
+    );
+
+    modify_file( $path, "second\n" );
+
+    _is_events(
+        [ $events_sub->($watcher) ],
+        [
+            {
+                path    => $path,
+                type    => 'modify',
+                content => [ "first\n", "first\nsecond\n" ],
+            },
+        ],
+        'got content in modify event',
+    );
+}
+
+sub _modify_content_on_some_things_tests {
+    my $class      = shift;
+    my $events_sub = shift;
+
+    my $parent = tempdir( CLEANUP => 1 );
+    my $subdir1 = File::Spec->catdir( $parent, 'subdir1' );
+    my $subdir2 = File::Spec->catdir( $parent, 'subdir2' );
+
+    for my $d ( $subdir1, $subdir2 ) {
+        mkpath( $d, 0, 0755 ) or die "Cannot mkpath $d: $!";
+    }
+
+    my $path1 = File::Spec->catfile( $subdir1, 'will-modify-content' );
+    my $path2 = File::Spec->catfile( $subdir2, 'will-modify-content' );
+
+    for my $p ( $path1, $path2 ) {
+        create_file( $p, "first\n" );
+    }
+
+    my $watcher = $class->new(
+        directories             => $parent,
+        follow_symlinks         => 0,
+        sleep_interval          => 0,
+        modify_includes_content => [qr/^\Q$subdir1/],
+    );
+
+    for my $p ( $path1, $path2 ) {
+        modify_file( $p, "second\n" );
+    }
+
+    _is_events(
+        [ $events_sub->($watcher) ],
+        [
+            {
+                path    => $path1,
+                type    => 'modify',
+                content => [ "first\n", "first\nsecond\n" ],
+            },
+            {
+                path => $path2,
+                type => 'modify',
+            },
+        ],
+        'got content in modify event for path where modify includes content',
     );
 }
 
@@ -503,28 +719,73 @@ sub _is_events {
     my $expected = shift;
     my $desc     = shift;
 
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
+    is(
+        $got,
+        array {
+            for my $e ( @{$expected} ) {
+                item object {
+                    call path => $e->{path};
+                    call type => $e->{type};
 
-    is_deeply(
-        [ map { { path => $_->path, type => $_->type } } @{$got} ],
-        $expected,
+                    if ( $e->{attributes} ) {
+
+                        # The event's attributes method will return a two
+                        # element array where each element is a hashref
+                        # containing some keys like permissions, uid, etc. We
+                        # don't want to check all the keys, just the ones we
+                        # care about
+                        call attributes => array {
+                            for my $i ( 0, 1 ) {
+                                item $i => hash {
+                                    for my $k (
+                                        sort
+                                        keys %{ $e->{attributes}[$i] }
+                                    ) {
+                                        field $k => $e->{attributes}[$i]{$k};
+                                    }
+                                    end();
+                                };
+                            }
+                            end();
+                        };
+                    }
+                    else {
+                        call has_attributes => F();
+                    }
+
+                    if ( $e->{content} ) {
+                        call content => $e->{content};
+                    }
+                    else {
+                        call has_content => F();
+                    }
+                };
+            }
+            end();
+        },
         "$desc"
     );
 }
 
 sub create_file {
-    my $path = shift;
+    my $path    = shift;
+    my $content = shift;
 
     diag("Creating $path");
 
     open my $fh, '>', $path
         or die "Cannot write to $path: $!";
+    if ( defined $content ) {
+        print {$fh} $content
+            or die "Cannot write to $path: $!";
+    }
     close $fh
         or die "Cannot write to $path: $!";
 }
 
 sub modify_file {
     my $path = shift;
+    my $content = shift || "1\n";
 
     diag("Modifying $path");
 
@@ -532,7 +793,7 @@ sub modify_file {
 
     open my $fh, '>>', $path
         or die "Cannot write to $path: $!";
-    print {$fh} "1\n"
+    print {$fh} $content
         or die "Cannot write to $path: $!";
     close $fh
         or die "Cannot write to $path: $!";
