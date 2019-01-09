@@ -4,7 +4,7 @@ File::ChangeNotify - Watch for changes to files, cross-platform style
 
 # VERSION
 
-version 0.30
+version 0.31
 
 # SYNOPSIS
 
@@ -88,7 +88,7 @@ Dave Rolsky <autarch@urth.org>
 
 # COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2009 - 2018 by Dave Rolsky.
+This software is Copyright (c) 2009 - 2019 by Dave Rolsky.
 
 This is free software, licensed under:
 
