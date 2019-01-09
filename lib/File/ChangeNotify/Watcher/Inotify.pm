@@ -214,7 +214,7 @@ sub _fake_events_for_new_dir {
                     );
             },
             follow_fast => ( $self->follow_symlinks ? 1 : 0 ),
-            no_chdir => 1
+            no_chdir    => 1
         },
         $dir
     );

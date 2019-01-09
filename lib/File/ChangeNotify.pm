@@ -46,7 +46,7 @@ sub _try_load {
     my $module = shift;
 
     my $ok = eval { use_module($module) };
-    my $e = $@;
+    my $e  = $@;
     return $module if $ok;
 
     die $e

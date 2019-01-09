@@ -568,7 +568,7 @@ sub _modify_file_attributes_on_some_things_tests {
     my $class      = shift;
     my $events_sub = shift;
 
-    my $parent = tempdir( CLEANUP => 1 );
+    my $parent  = tempdir( CLEANUP => 1 );
     my $subdir1 = File::Spec->catdir( $parent, 'subdir1' );
     my $subdir2 = File::Spec->catdir( $parent, 'subdir2' );
 
@@ -669,7 +669,7 @@ sub _modify_content_on_some_things_tests {
     my $class      = shift;
     my $events_sub = shift;
 
-    my $parent = tempdir( CLEANUP => 1 );
+    my $parent  = tempdir( CLEANUP => 1 );
     my $subdir1 = File::Spec->catdir( $parent, 'subdir1' );
     my $subdir2 = File::Spec->catdir( $parent, 'subdir2' );
 
@@ -782,7 +782,7 @@ sub create_file {
 }
 
 sub modify_file {
-    my $path = shift;
+    my $path    = shift;
     my $content = shift || "1\n";
 
     diag("Modifying $path");
