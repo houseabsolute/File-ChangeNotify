@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+- No changes from 0.30.
+
+
 0.30   2018-10-08 (TRIAL RELEASE)
 
 - Added an optional feature to track path attribute changes (permissions,
