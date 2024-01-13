@@ -163,8 +163,6 @@ sub _entry_for_map {
     # -d.
     my @stat = stat;
 
-    return if -l $path && !$is_dir;
-
     unless ($is_dir) {
         my $filter = $self->filter;
         return unless ( File::Spec->splitpath($path) )[2] =~ /$filter/;
